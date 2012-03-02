@@ -64,6 +64,14 @@ public final class EntityKey implements Serializable {
 		return columnNames;
 	}
 
+	public Serializable getId() {
+		return id;
+	}
+
+	public String getTable() {
+		return table;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
