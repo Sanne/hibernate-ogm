@@ -39,6 +39,7 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.ogm.jpa.HibernateOgmPersistence;
+import org.hibernate.ogm.test.simpleentity.OgmTestBase;
 import org.hibernate.ogm.test.utils.PackagingRule;
 import org.hibernate.service.jta.platform.internal.JBossStandAloneJtaPlatform;
 import org.hibernate.service.jta.platform.spi.JtaPlatform;
@@ -46,7 +47,7 @@ import org.hibernate.service.jta.platform.spi.JtaPlatform;
 /**
  * @author Emmanuel Bernard <emmanuel@hibernate.org>
  */
-public abstract class JpaTestCase {
+public abstract class JpaTestCase extends OgmTestBase {
 
 	private EntityManagerFactory factory;
 	private TransactionManager transactionManager;
@@ -62,7 +63,40 @@ public abstract class JpaTestCase {
 	}
 
 	@Before
+	public void setUp() throws MalformedURLException {
+		this.setUpServer();
+		GetterPersistenceUnitInfo info = new GetterPersistenceUnitInfo();
+		info.setClassLoader( Thread.currentThread().getContextClassLoader() );
+		// we explicitly list them to avoid scanning
+		info.setExcludeUnlistedClasses( true );
+		info.setJtaDataSource( new NoopDatasource() );
+		List<String> classNames = new ArrayList<String>();
+		for ( Class<?> clazz : getEntities() ) {
+			classNames.add( clazz.getName() );
+		}
+		info.setManagedClassNames( classNames );
+		info.setNonJtaDataSource( null );
+		info.setPersistenceProviderClassName( HibernateOgmPersistence.class
+				.getName() );
+		info.setPersistenceUnitName( "default" );
+		final URL persistenceUnitRootUrl = PackagingRule.getTargetDir().toURI()
+				.toURL();
+		info.setPersistenceUnitRootUrl( persistenceUnitRootUrl );
+		info.setPersistenceXMLSchemaVersion( "2.0" );
+		info.setProperties( new Properties() );
+		info.setSharedCacheMode( SharedCacheMode.ENABLE_SELECTIVE );
+		info.setTransactionType( PersistenceUnitTransactionType.JTA );
+		info.setValidationMode( ValidationMode.AUTO );
+		info.getProperties().setProperty( Environment.JTA_PLATFORM,
+				JBossStandAloneJtaPlatform.class.getName() );
+		refineInfo( info );
+		factory = new HibernateOgmPersistence()
+				.createContainerEntityManagerFactory( info, Collections.EMPTY_MAP );
+		transactionManager = extractJBossTransactionManager( factory );
+	}
+
 	public void createFactory() throws MalformedURLException {
+		this.setUpServer();
 		GetterPersistenceUnitInfo info = new GetterPersistenceUnitInfo();
 		info.setClassLoader( Thread.currentThread().getContextClassLoader() );
 		//we explicitly list them to avoid scanning
@@ -109,9 +143,16 @@ public abstract class JpaTestCase {
 	}
 
 	@After
+	public void tearDown() {
+		factory.close();
+		factory = null;
+		this.stopServer();
+	}
+
 	public void closeFactory() {
 		factory.close();
 		factory = null;
+		this.stopServer();
 	}
 
 }

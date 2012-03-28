@@ -21,6 +21,9 @@
 package org.hibernate.ogm.persister;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hibernate.ogm.grid.EntityKey;
 
@@ -40,4 +43,24 @@ final public class EntityKeyBuilder {
 		return new EntityKey( tableName, id );
 	}
 
+	/**
+	 * Once the tests are done, change the scope to private. This method is
+	 * necessarily called by VoldemortDatastoreProvider.getEntityMap().
+	 * 
+	 * @param persister
+	 * @return
+	 */
+	public static Map<String, String> getColumnMap(OgmEntityPersister persister) {
+		Map<String, String> map = new HashMap<String, String>();
+
+		for ( String propName : persister.getPropertyNames() ) {
+
+			String columnName = persister.getPropertyColumnNames( propName )[0];
+			if ( !propName.equals( columnName ) ) {
+				map.put( propName, columnName );
+			}
+		}
+
+		return Collections.unmodifiableMap( map );
+	}
 }

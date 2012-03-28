@@ -22,6 +22,9 @@ package org.hibernate.ogm.grid;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents the key used to represent a row
@@ -68,6 +71,33 @@ public final class RowKey implements Serializable {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Gets table name that this owns.
+	 * 
+	 * @return Table name.
+	 */
+	public String getTable() {
+		return this.table;
+	}
+
+	/**
+	 * Gets row key as Map object containing owning columns.
+	 * 
+	 * @return Row key as Map representation.
+	 */
+	public Map<String, Object> getRowKeyAsMap() {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		if ( this.columns != null && this.columnValues != null ) {
+			for ( int i = 0; i < this.columns.length; i++ ) {
+				map.put( this.columns[i], this.columnValues[i] );
+			}
+		}
+		map.put( "table", this.table );
+		return Collections.unmodifiableMap( map );
 	}
 
 	@Override

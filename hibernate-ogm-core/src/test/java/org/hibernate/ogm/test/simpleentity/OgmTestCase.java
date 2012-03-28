@@ -30,7 +30,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 
@@ -61,7 +60,7 @@ import org.hibernate.testing.SkipForDialect;
  * @author Emmanuel Bernard
  * @author Hardy Ferentschik
  */
-public abstract class OgmTestCase extends TestCase {
+public abstract class OgmTestCase extends OgmTestBase {
 
 	private static final Log log = LoggerFactory.make();
 	protected static SessionFactory sessions;
@@ -72,6 +71,7 @@ public abstract class OgmTestCase extends TestCase {
 
 	@Before
 	public void setUp() throws Exception {
+		this.setUpServer();
 		if ( cfg == null || lastTestClass != getClass() ) {
 			buildConfiguration();
 			lastTestClass = getClass();
@@ -96,6 +96,7 @@ public abstract class OgmTestCase extends TestCase {
 	@After
 	public void tearDown() throws Exception {
 		//runSchemaDrop();
+		this.stopServer();
 		handleUnclosedResources();
 		closeResources();
 

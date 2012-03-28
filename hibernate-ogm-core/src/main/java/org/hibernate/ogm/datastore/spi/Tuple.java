@@ -28,7 +28,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hibernate.ogm.datastore.spi.TupleOperationType.*;
+import org.hibernate.ogm.util.impl.Log;
+import org.hibernate.ogm.util.impl.LoggerFactory;
+
+import com.google.gson.Gson;
 
 /**
  * Represents a Tuple (think of it as a row)
@@ -45,8 +48,12 @@ import static org.hibernate.ogm.datastore.spi.TupleOperationType.*;
  */
 public class Tuple {
 
+	private static final Log log = LoggerFactory.make();
 	private final TupleSnapshot snapshot;
 	private Map<String, TupleOperation> currentState = null; //lazy initialize the Map as it costs quite some memory
+
+	private final Gson gson = new Gson();
+	private final JSONedClassDetector jsonedDetector = new JSONedClassDetector();
 
 	public Tuple(TupleSnapshot snapshot) {
 		this.snapshot = snapshot;
@@ -121,5 +128,69 @@ public class Tuple {
 			}
 		}
 		return columnNames;
+	}
+
+	/**
+	 * Gets column values.
+	 * 
+	 * @return Set<Object> All the corresponding column values. If there are no
+	 *         column names, then returns an empty Set.
+	 */
+	public Set<Object> getColumnValues() {
+
+		Set<String> columnNames = getColumnNames();
+		if ( currentState == null || columnNames.isEmpty() == true ) {
+			return Collections.EMPTY_SET;
+		}
+
+		Set<Object> columnValues = new HashSet<Object>();
+		for ( String columnName : columnNames ) {
+			columnValues.add( currentState.get( columnName ) );
+		}
+
+		return Collections.unmodifiableSet( columnValues );
+	}
+
+	/**
+	 * Gets snapshot as Map.
+	 * 
+	 * @return Map<String,Object> All the column name and value pairs as Map.
+	 */
+	public Map<String, Object> getSnapShotAsMap() {
+		Set<String> columnNames = getColumnNames();
+		if ( currentState == null || columnNames.isEmpty() == true ) {
+			return Collections.EMPTY_MAP;
+		}
+
+		return this.putJSONedValueAsNeeded( columnNames );
+	}
+
+	/**
+	 * Changes the value for the column as JSON format.
+	 * 
+	 * @param columnNames
+	 *            All the columnNames in the entity object.
+	 * @return Newly created Map storing JSON format when required.
+	 * @throws ClassNotFoundException
+	 */
+	private Map<String, Object> putJSONedValueAsNeeded(Set<String> columnNames) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		for ( String columnName : columnNames ) {
+			if ( snapshot.get( columnName ) == null ) {
+				map.put( columnName, null );
+			}
+			else if ( snapshot.get( columnName ).getClass().isArray() ) {
+				map.put( columnName, this.gson.toJson( snapshot.get( columnName ) ) );
+			}
+			else if ( this.jsonedDetector.isAssignable( snapshot.get( columnName ).getClass() ) ) {
+				map.put( columnName, this.gson.toJson( snapshot.get( columnName ) ) );
+			}
+			else {
+				map.put( columnName, snapshot.get( columnName ) );
+			}
+		}
+		return map;
 	}
 }
