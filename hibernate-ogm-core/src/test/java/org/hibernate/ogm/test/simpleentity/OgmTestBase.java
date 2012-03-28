@@ -35,15 +35,15 @@ public abstract class OgmTestBase extends TestCase {
 		log.info("provider: " + provider);
 		if (provider
 				.equals("org.hibernate.ogm.datastore.voldemort.impl.VoldemortDatastoreProvider")) {
-			this.server = new EmbeddedVoldemort();
+			server = new EmbeddedVoldemort();
 		} else {
-			this.server = new NoopServer();
+			server = new NoopServer();
 		}
 
 		this.startServer();
 	}
 
 	protected ServerAware getServer() {
-		return this.server;
+		return server;
 	}
 }

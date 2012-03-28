@@ -20,7 +20,9 @@
  */
 package org.hibernate.ogm.datastore.spi;
 
-import org.hibernate.ogm.datastore.impl.SetFromCollection;
+import static org.hibernate.ogm.datastore.spi.TupleOperationType.PUT;
+import static org.hibernate.ogm.datastore.spi.TupleOperationType.PUT_NULL;
+import static org.hibernate.ogm.datastore.spi.TupleOperationType.REMOVE;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,10 +30,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.ogm.datastore.impl.SetFromCollection;
 import org.hibernate.ogm.util.impl.Log;
 import org.hibernate.ogm.util.impl.LoggerFactory;
-
-import com.google.gson.Gson;
 
 /**
  * Represents a Tuple (think of it as a row)
@@ -52,8 +53,9 @@ public class Tuple {
 	private final TupleSnapshot snapshot;
 	private Map<String, TupleOperation> currentState = null; //lazy initialize the Map as it costs quite some memory
 
-	private final Gson gson = new Gson();
 	private final JSONedClassDetector jsonedDetector = new JSONedClassDetector();
+	private final JSONHelper jsonHelper = new JSONHelper(
+			new WrapperClassDetector(), jsonedDetector);
 
 	public Tuple(TupleSnapshot snapshot) {
 		this.snapshot = snapshot;
@@ -177,18 +179,16 @@ public class Tuple {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		for ( String columnName : columnNames ) {
-			if ( snapshot.get( columnName ) == null ) {
-				map.put( columnName, null );
-			}
-			else if ( snapshot.get( columnName ).getClass().isArray() ) {
-				map.put( columnName, this.gson.toJson( snapshot.get( columnName ) ) );
-			}
-			else if ( this.jsonedDetector.isAssignable( snapshot.get( columnName ).getClass() ) ) {
-				map.put( columnName, this.gson.toJson( snapshot.get( columnName ) ) );
-			}
-			else {
-				map.put( columnName, snapshot.get( columnName ) );
+		for (String columnName : columnNames) {
+			if (snapshot.get(columnName) == null) {
+				map.put(columnName, null);
+			} else if (snapshot.get(columnName).getClass().isArray()) {
+				map.put(columnName, jsonHelper.toJSON(snapshot.get(columnName)));
+			} else if (this.jsonedDetector.isAssignable(snapshot
+					.get(columnName).getClass())) {
+				map.put(columnName, jsonHelper.toJSON(snapshot.get(columnName)));
+			} else {
+				map.put(columnName, snapshot.get(columnName));
 			}
 		}
 		return map;
