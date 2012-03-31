@@ -26,13 +26,11 @@ import org.hibernate.ogm.type.GridType;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 /**
-* @author Emmanuel Bernard <emmanuel@hibernate.org>
-*/
+ * @author Emmanuel Bernard <emmanuel@hibernate.org>
+ */
 public class OverridingTypeDialect extends HashMapDialect {
 
 	public OverridingTypeDialect(MapBasedDatastoreProvider provider) {
