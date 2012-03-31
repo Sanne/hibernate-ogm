@@ -22,12 +22,11 @@ package org.hibernate.ogm.test.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import org.jboss.shrinkwrap.api.ArchivePath;
 import org.jboss.shrinkwrap.api.ArchivePaths;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.classloader.ShrinkWrapClassLoader;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.rules.TemporaryFolder;
@@ -66,7 +65,7 @@ public class PackagingRule extends TemporaryFolder {
 	@Override
 	public void before() throws Throwable {
 		super.before();
-		URLClassLoader classLoader = new URLClassLoader( new URL[]{ testPackage.toURL() }, originalClassLoader );
+		ShrinkWrapClassLoader classLoader = new ShrinkWrapClassLoader( originalClassLoader, archive );
 		Thread.currentThread().setContextClassLoader( classLoader );
 	}
 
