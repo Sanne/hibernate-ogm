@@ -42,6 +42,9 @@
     <!-- *************************** -->
 
     <default>
+        <storeAsBinary 
+            enabled="true"/>
+
         <transaction
             transactionMode="TRANSACTIONAL"
             transactionManagerLookupClass="org.infinispan.transaction.lookup.JBossStandaloneJTAManagerLookup" />
