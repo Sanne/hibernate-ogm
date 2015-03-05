@@ -6,17 +6,14 @@
  */
 package org.hibernate.ogm.utils;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import org.jboss.shrinkwrap.api.ArchivePath;
 import org.jboss.shrinkwrap.api.ArchivePaths;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.rules.TemporaryFolder;
+import org.junit.rules.ExternalResource;
+import org.jboss.shrinkwrap.api.classloader.ShrinkWrapClassLoader;
 
 /**
  * test case useful when one want to write a test relying on an archive (like a JPA archive)
@@ -25,34 +22,25 @@ import org.junit.rules.TemporaryFolder;
  * @author Emmanuel Bernard &lt;emmanuel@hibernate.org&gt;
  * @author Sanne Grinovero
  */
-public class PackagingRule extends TemporaryFolder {
+public class PackagingRule extends ExternalResource {
 
 	protected static ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+	ShrinkWrapClassLoader sd;
 
 	private static final ArchivePath persistencePath = ArchivePaths.create( "persistence.xml" );
 	private final JavaArchive archive;
-	private final File testPackage;
+	private final ShrinkWrapClassLoader classLoader;
 
 	public PackagingRule(String persistenceConfResource, Class<?>... entities) {
-		try {
-			create();
-
-			archive = ShrinkWrap.create( JavaArchive.class, "jtastandalone.jar" );
-			archive.addClasses( entities );
-			archive.addAsManifestResource( persistenceConfResource, persistencePath );
-
-			testPackage = newFile();
-		}
-		catch ( IOException e ) {
-			throw new RuntimeException( e );
-		}
-		archive.as( ZipExporter.class ).exportTo( testPackage, true );
+		archive = ShrinkWrap.create( JavaArchive.class, "jtastandalone.jar" );
+		archive.addClasses( entities );
+		archive.addAsManifestResource( persistenceConfResource, persistencePath );
+		classLoader = new ShrinkWrapClassLoader( originalClassLoader, archive );
 	}
 
 	@Override
 	public void before() throws Throwable {
 		super.before();
-		URLClassLoader classLoader = new URLClassLoader( new URL[]{ testPackage.toURL() }, originalClassLoader );
 		Thread.currentThread().setContextClassLoader( classLoader );
 	}
 
@@ -60,6 +48,13 @@ public class PackagingRule extends TemporaryFolder {
 	public void after() {
 		// reset the classloader
 		Thread.currentThread().setContextClassLoader( originalClassLoader );
+		try {
+			// Release the open input streams of ShrinkWrapClassLoader
+			classLoader.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 		super.after();
 	}
 
