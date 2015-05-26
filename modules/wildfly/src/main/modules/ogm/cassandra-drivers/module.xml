@@ -13,6 +13,7 @@
         <resource-root path="cassandra-driver-core-${cassandraVersion}.jar" />
         <resource-root path="netty-${nettyVersion}.jar" />
         <resource-root path="metrics-core-${codahaleMetricsVersion}.jar" />
+        <resource-root path="guava-${guavaVersion}.jar" />
     </resources>
     <dependencies>
         <module name="org.slf4j" />
