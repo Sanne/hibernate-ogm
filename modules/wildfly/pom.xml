@@ -73,6 +73,13 @@
             <optional>true</optional>
             <version>${neo4jLuceneVersion}</version>
         </dependency>
+        <!-- Other modules classify this as a test version, but it's a runtime
+            requirement for the DataStax Cassandra driver -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>

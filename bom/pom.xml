@@ -58,6 +58,7 @@
         but we need an explicit definition to package them in modules. -->
         <nettyVersion>3.9.0.Final</nettyVersion>
         <codahaleMetricsVersion>3.0.2</codahaleMetricsVersion>
+        <guavaVersion>18.0</guavaVersion>
         <!-- slf4J is also being used - luckily it's in synch with the above defined version 1.7.5 -->
         <!-- end of datastax dependencies -->
     </properties>
@@ -454,6 +455,11 @@
                 <groupId>com.codahale.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
                 <version>${codahaleMetricsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guavaVersion}</version>
             </dependency>
 
         <dependency>
