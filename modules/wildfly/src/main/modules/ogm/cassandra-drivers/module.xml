@@ -16,6 +16,14 @@
         <resource-root path="guava-${guavaVersion}.jar" />
     </resources>
     <dependencies>
+
+        <!-- A dependency for metrics-core -->
         <module name="org.slf4j" />
+
+        <!-- The driver needs to access sun.misc.Unsafe ...-->
+        <module name="sun.jdk" />
+
+        <!-- ... and to management API -->
+        <module name="javax.api" />
     </dependencies>
 </module>
