@@ -56,8 +56,8 @@
              <filtered>true</filtered>
         </file>
         <file>
-             <source>${module.xml.basedir}/ogm/cassandra-drivers/module.xml</source>
-             <outputDirectory>/org/hibernate/ogm/cassandra/drivers/${hibernate.ogm.cassandra.module.slot}</outputDirectory>
+             <source>${module.xml.basedir}/ogm/cassandra-driver/module.xml</source>
+             <outputDirectory>/org/hibernate/ogm/cassandra/driver/${hibernate.ogm.cassandra.module.slot}</outputDirectory>
              <filtered>true</filtered>
         </file>
         <file>
@@ -123,7 +123,7 @@
        </dependencySet>
        <dependencySet>
              <useProjectArtifact>false</useProjectArtifact>
-             <outputDirectory>org/hibernate/ogm/cassandra/drivers/${hibernate.ogm.cassandra.module.slot}</outputDirectory>
+             <outputDirectory>org/hibernate/ogm/cassandra/driver/${hibernate.ogm.cassandra.module.slot}</outputDirectory>
              <useTransitiveFiltering>false</useTransitiveFiltering>
              <unpack>false</unpack>
              <includes>
