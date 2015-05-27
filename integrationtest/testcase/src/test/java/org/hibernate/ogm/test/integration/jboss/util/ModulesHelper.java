@@ -8,9 +8,9 @@ package org.hibernate.ogm.test.integration.jboss.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -25,7 +25,7 @@ import org.jboss.shrinkwrap.descriptor.api.spec.se.manifest.ManifestDescriptor;
  */
 public class ModulesHelper {
 
-	public static void addModulesDependencyDeclaration(Archive archive, String dependencies) {
+	public static void addModulesDependencyDeclaration(Archive<?> archive, String dependencies) {
 		archive.add( manifest( injectVariables( dependencies ) ), "META-INF/MANIFEST.MF" );
 	}
 
