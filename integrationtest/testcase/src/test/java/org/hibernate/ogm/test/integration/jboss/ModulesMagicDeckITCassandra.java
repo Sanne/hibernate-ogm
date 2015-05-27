@@ -11,7 +11,7 @@ import static org.hibernate.ogm.test.integration.jboss.util.CassandraConfigurati
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 /**
  * Test for the Hibernate OGM module in WildFly using Cassandra.
  * The class name has to finish with "ITCassandra" for the test to be enabled in the right profile.
- *
+ * <p>
  * At time of writing, the Cassandra GridDialect implementation is not ready to handle associations
  * so we'll use an over simplified model.
  *
@@ -116,7 +116,7 @@ public class ModulesMagicDeckITCassandra {
 		shivan.setManacost( "4RR" );
 		shivan.setPower( 5 );
 		shivan.setThoughness( 5 );
-		shivan.setPublicationDate( new Date( 1993, 8, 5 ) );
+		shivan.setPublicationDate( new GregorianCalendar( 1993, 8, 5 ).getTime() );
 		return shivan;
 	}
 
@@ -127,7 +127,7 @@ public class ModulesMagicDeckITCassandra {
 		welp.setManacost( "2RR" );
 		welp.setPower( 2 );
 		welp.setThoughness( 3 );
-		welp.setPublicationDate( new Date( 1993, 8, 5 ) );
+		welp.setPublicationDate( new GregorianCalendar( 1993, 8, 5 ).getTime() );
 		return welp;
 	}
 
