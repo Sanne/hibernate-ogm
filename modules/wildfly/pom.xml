@@ -24,6 +24,18 @@
         <infinispan.module.slot>main</infinispan.module.slot>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Overriding the version used for tests in OGM (managed in the parent) with the one used by the C* driver -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <optional>true</optional>
+                <version>${cassandraGuavaVersion}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.hibernate.ogm</groupId>
@@ -72,13 +84,6 @@
             <artifactId>lucene-core</artifactId>
             <optional>true</optional>
             <version>${neo4jLuceneVersion}</version>
-        </dependency>
-        <!-- Other modules classify this as a test version, but it's a runtime
-            requirement for the DataStax Cassandra driver -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
