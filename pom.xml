@@ -180,9 +180,14 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <showWarnings>true</showWarnings>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <fork>false</fork>
+                    <source>1.9</source>
+                    <target>1.9</target>
                     <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <compilerArg>-profile compact3</compilerArg>
+                        <!-- <compilerArg>-encoding UTF-8</compilerArg> -->
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
