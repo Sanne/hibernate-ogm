@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ ~ Hibernate OGM, Domain model persistence for NoSQL datastores
+ ~
+ ~ License: GNU Lesser General Public License (LGPL), version 2.1 or later
+ ~ See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+  -->
+
+<!--
+    This is the testing configuration, running in LOCAL clustering mode to speedup tests.
+-->
+<infinispan
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:infinispan:config:8.2 http://www.infinispan.org/schemas/infinispan-config-8.2.xsd"
+    xmlns="urn:infinispan:config:8.2">
+
+    <cache-container name="HibernateOGM-Testsuite" default-cache="DEFAULT" statistics="false">
+
+        <jmx duplicate-domains="true"/>
+
+        <!-- *************************** -->
+        <!--   Default cache settings    -->
+        <!-- *************************** -->
+        <local-cache name="DEFAULT">
+            <expiration interval="-1"/>
+        </local-cache>
+
+        <local-cache name="___protobuf_metadata" />
+
+    </cache-container>
+</infinispan>
