@@ -18,6 +18,7 @@ import org.hibernate.ogm.datastore.infinispanremote.impl.protobuf.TableDefinitio
 import org.hibernate.ogm.datastore.spi.BaseSchemaDefiner;
 import org.hibernate.ogm.datastore.spi.DatastoreProvider;
 import org.hibernate.ogm.options.spi.OptionsService;
+import org.hibernate.ogm.type.spi.GridType;
 import org.hibernate.ogm.type.spi.TypeTranslator;
 import org.hibernate.service.spi.ServiceRegistryImplementor;
 import org.hibernate.type.Type;
@@ -39,7 +40,8 @@ public class ProtobufSchemaInitializer extends BaseSchemaDefiner {
 				context.getAllAssociationKeyMetadata(),
 				context.getAllIdSourceKeyMetadata()
 		);
-		SchemaDefinitions sd = new SchemaDefinitions();
+		String protobufPackageName = datastoreProvider.getProtobufPackageName();
+		SchemaDefinitions sd = new SchemaDefinitions( protobufPackageName );
 		for ( Namespace namespace : context.getDatabase().getNamespaces() ) {
 			for ( Table table : namespace.getTables() ) {
 				if ( table.isPhysicalTable() ) {
@@ -54,11 +56,21 @@ public class ProtobufSchemaInitializer extends BaseSchemaDefiner {
 		//FIXME implement me
 //		org.infinispan.protostream.FileDescriptorSource.fromString(String, String)
 		TableDefinition td = new TableDefinition( table.getName() );
+		/*
+		 * The primary key is also defined among "normal" columns.
+		 * Do we need this to encode the K of the K/V store?
+		 * It's not indexed..
+		 *
 		if ( table.hasPrimaryKey() ) {
+//			td.addPrimaryKey( table.getPrimaryKey() );
 			for ( Column pkColumn : table.getPrimaryKey().getColumns() ) {
-				td.addPrimaryKeyColumn( pkColumn );
+				String name = pkColumn.getName();
+				Type type = pkColumn.getValue().getType();
+				GridType gridType = typeTranslator.getType( type );
+				td.addPrimaryKeyColumn( pkColumn, gridType );
 			}
 		}
+		*/
 		Iterator<Column> columnIterator = table.getColumnIterator();
 		while ( columnIterator.hasNext() ) {
 			Column column = columnIterator.next();
@@ -76,8 +88,10 @@ public class ProtobufSchemaInitializer extends BaseSchemaDefiner {
 				int index = column.getTypeIndex();
 				type = ((org.hibernate.type.ComponentType) column.getValue().getType()).getSubtypes()[index];
 			}
-			td.addValueColumn( column );
+			GridType gridType = typeTranslator.getType( type );
+			td.addValueColumn( column, gridType );
 		}
+		sd.registerTableDefinition( td );
 	}
 
 	@Override

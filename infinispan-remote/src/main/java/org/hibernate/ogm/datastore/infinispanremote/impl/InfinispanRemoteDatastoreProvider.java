@@ -86,7 +86,9 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 
 	public void registerSchemaDefinitions(SchemaDefinitions sd) {
 		RemoteCache<String,String> protobufCache = getProtobufCache();
-		sd.deploySchema( protobufCache );
+		//FIXME make this name configurable & give it a sensible default:
+		final String generatedProtobufName = "Hibernate_OGM_Generated_schema.proto";
+		sd.deploySchema( generatedProtobufName, protobufCache );
 	}
 
 	private RemoteCache<String, String> getProtobufCache() {
@@ -97,6 +99,10 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 	public boolean allowsTransactionEmulation() {
 		// Hot Rod doesn't support real transaction yet
 		return true;
+	}
+
+	public String getProtobufPackageName() {
+		return "HibernateOGMGenerated";
 	}
 
 }
