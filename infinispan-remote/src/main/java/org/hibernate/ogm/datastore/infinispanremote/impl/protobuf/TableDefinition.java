@@ -12,6 +12,7 @@ import java.util.List;
 import org.hibernate.AssertionFailure;
 import org.hibernate.mapping.Column;
 import org.hibernate.ogm.type.impl.IntegerType;
+import org.hibernate.ogm.type.impl.LongType;
 import org.hibernate.ogm.type.impl.StringType;
 import org.hibernate.ogm.type.spi.GridType;
 
@@ -44,6 +45,9 @@ public class TableDefinition {
 		}
 		else if ( gridType instanceof IntegerType ) {
 			fieldset.add( new IntegerProtofieldWriter( uniqueTagAssigningCounter, name ) );
+		}
+		else if ( gridType instanceof LongType ) {
+			fieldset.add( new LongProtofieldWriter( uniqueTagAssigningCounter, name ) );
 		}
 		else {
 			throw new AssertionFailure( "Type not implemented yet! " + gridType.getName() );
