@@ -22,7 +22,7 @@ public class StringProtofieldWriter implements ProtofieldWriter<String> {
 
 	@Override
 	public void writeTo(CodedOutputStream outProtobuf, String value) throws IOException {
-		outProtobuf.writeString( fieldLabel, value);
+		outProtobuf.writeString( fieldLabel, value );
 	}
 
 	@Override

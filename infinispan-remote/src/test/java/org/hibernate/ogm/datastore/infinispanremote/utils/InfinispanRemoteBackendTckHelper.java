@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
  * @author Sanne Grinovero
  */
 @RunWith(ClasspathSuite.class)
-@ClasspathSuite.ClassnameFilters({ ".*CRUDTest" })
+@ClasspathSuite.ClassnameFilters({ ".*BuiltInTypeTest" })
 public class InfinispanRemoteBackendTckHelper {
 
 	public static void main(String[] args) {

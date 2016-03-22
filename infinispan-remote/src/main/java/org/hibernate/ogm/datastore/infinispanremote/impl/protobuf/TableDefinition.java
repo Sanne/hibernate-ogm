@@ -11,10 +11,14 @@ import java.util.List;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.mapping.Column;
+import org.hibernate.ogm.type.impl.EnumType;
 import org.hibernate.ogm.type.impl.IntegerType;
 import org.hibernate.ogm.type.impl.LongType;
 import org.hibernate.ogm.type.impl.StringType;
 import org.hibernate.ogm.type.spi.GridType;
+import org.hibernate.type.CustomType;
+import org.hibernate.type.Type;
+import org.hibernate.usertype.UserType;
 
 public class TableDefinition {
 
@@ -27,19 +31,19 @@ public class TableDefinition {
 		this.tableName = name;
 	}
 
-	public void addPrimaryKeyColumn(Column pkColumn, GridType gridType) {
+	public void addPrimaryKeyColumn(Column pkColumn, GridType gridType, Type type, Type ormType) {
 		uniqueTagAssigningCounter++;
 		String name = pkColumn.getName();
-		addMapping( keyFields, name, uniqueTagAssigningCounter, gridType );
+		addMapping( keyFields, name, uniqueTagAssigningCounter, gridType, ormType );
 	}
 
-	public void addValueColumn(Column column, GridType gridType) {
+	public void addValueColumn(Column column, GridType gridType, Type ormType) {
 		uniqueTagAssigningCounter++;
 		String name = column.getName();
-		addMapping( valueFields, name, uniqueTagAssigningCounter, gridType );
+		addMapping( valueFields, name, uniqueTagAssigningCounter, gridType, ormType );
 	}
 
-	private void addMapping(List<ProtofieldWriter> fieldset, String name, int labelCounter2, GridType gridType) {
+	private void addMapping(List<ProtofieldWriter> fieldset, String name, int labelCounter2, GridType gridType, Type ormType) {
 		if ( gridType instanceof StringType ) {
 			fieldset.add( new StringProtofieldWriter( uniqueTagAssigningCounter, name ) );
 		}
@@ -49,8 +53,21 @@ public class TableDefinition {
 		else if ( gridType instanceof LongType ) {
 			fieldset.add( new LongProtofieldWriter( uniqueTagAssigningCounter, name ) );
 		}
+		else if ( gridType instanceof EnumType ) {
+			EnumType etype = (EnumType) gridType;
+			if ( ormType instanceof CustomType ) {
+				CustomType customOrmType = (CustomType) ormType;
+				UserType userType = customOrmType.getUserType();
+				org.hibernate.type.EnumType enumtype = (org.hibernate.type.EnumType) userType;
+				Class returnedClass = enumtype.returnedClass();
+				fieldset.add( new EnumProtofieldWriter( uniqueTagAssigningCounter, name, returnedClass ) );
+			}
+			else {
+				throw new AssertionFailure( "Type not implemented yet! " );
+			}
+		}
 		else {
-			throw new AssertionFailure( "Type not implemented yet! " + gridType.getName() );
+			//throw new AssertionFailure( "Type not implemented yet! " + gridType.getName() );
 		}
 	}
 
@@ -60,9 +77,14 @@ public class TableDefinition {
 
 	public void exportProtobufEntry(StringBuilder sb) {
 		sb.append( "\nmessage " ).append( tableName ).append( " {" );
-		keyFields.forEach( (v) -> v.exportProtobufFieldDefinition( sb ) );
-		valueFields.forEach( (v) -> v.exportProtobufFieldDefinition( sb ) );
+		keyFields.forEach( ( v ) -> v.exportProtobufFieldDefinition( sb ) );
+		valueFields.forEach( ( v ) -> v.exportProtobufFieldDefinition( sb ) );
 		sb.append( "\n}\n" );
+	}
+
+	void collectTypeDeclarations(TypeDeclarationsCollector typesDefCollector) {
+		keyFields.forEach( ( v ) -> v.collectTypeDefinitions( typesDefCollector ) );
+		valueFields.forEach( ( v ) -> v.collectTypeDefinitions( typesDefCollector ) );
 	}
 
 }

@@ -16,4 +16,8 @@ public interface ProtofieldWriter<T> {
 
 	void exportProtobufFieldDefinition(StringBuilder sb);
 
+	default void collectTypeDefinitions(TypeDeclarationsCollector typesDefCollector) {
+		// The default implementation is a no-op
+	}
+
 }

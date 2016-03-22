@@ -81,15 +81,15 @@ public class ProtobufSchemaInitializer extends BaseSchemaDefiner {
 				type = type.getSemiResolvedType( sessionFactory );
 				if ( type.isComponentType() ) {
 					int index = column.getTypeIndex();
-					type = ((org.hibernate.type.ComponentType) type).getSubtypes()[index];
+					type = ( (org.hibernate.type.ComponentType) type ).getSubtypes()[index];
 				}
 			}
 			else if ( type.isComponentType() ) {
 				int index = column.getTypeIndex();
-				type = ((org.hibernate.type.ComponentType) column.getValue().getType()).getSubtypes()[index];
+				type = ( (org.hibernate.type.ComponentType) column.getValue().getType() ).getSubtypes()[index];
 			}
 			GridType gridType = typeTranslator.getType( type );
-			td.addValueColumn( column, gridType );
+			td.addValueColumn( column, gridType, type );
 		}
 		sd.registerTableDefinition( td );
 	}

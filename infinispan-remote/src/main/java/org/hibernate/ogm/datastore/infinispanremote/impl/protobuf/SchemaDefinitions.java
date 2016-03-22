@@ -32,10 +32,13 @@ public class SchemaDefinitions {
 	}
 
 	private String generateProtoschema() {
+		TypeDeclarationsCollector typesDefCollector = new TypeDeclarationsCollector();
 		StringBuilder sb = new StringBuilder( 400 );
 		sb.append( "import \"org/infinispan/protostream/message-wrapping.proto\";\n" );
-		sb.append( "\npackage ").append( packageName ).append( ";\n" );
-		tableDefinitionsByName.forEach( (k, v) -> v.exportProtobufEntry( sb ) );
+		sb.append( "\npackage " ).append( packageName ).append( ";\n" );
+		tableDefinitionsByName.forEach( ( k, v ) -> v.collectTypeDeclarations( typesDefCollector ) );
+		typesDefCollector.exportProtobufEntries( sb );
+		tableDefinitionsByName.forEach( ( k, v ) -> v.exportProtobufEntry( sb ) );
 		String fullSchema = sb.toString();
 		System.out.println( "Generated schema: \n===========\n" + fullSchema + "\n===========\n" );
 		return fullSchema;
@@ -49,4 +52,3 @@ public class SchemaDefinitions {
 	}
 
 }
-
