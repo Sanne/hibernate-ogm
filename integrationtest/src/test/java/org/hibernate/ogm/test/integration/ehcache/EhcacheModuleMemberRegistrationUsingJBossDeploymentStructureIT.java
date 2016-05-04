@@ -9,10 +9,10 @@ package org.hibernate.ogm.test.integration.ehcache;
 import org.hibernate.ogm.test.integration.testcase.ModuleMemberRegistrationScenario;
 import org.hibernate.ogm.test.integration.testcase.model.Member;
 import org.hibernate.ogm.test.integration.testcase.util.ModuleMemberRegistrationDeployment;
+import org.hibernate.ogm.test.integration.testcase.util.TestingPersistenceDescriptor;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 import org.jboss.shrinkwrap.descriptor.api.persistence20.PersistenceDescriptor;
 import org.junit.runner.RunWith;
 
@@ -36,18 +36,11 @@ public class EhcacheModuleMemberRegistrationUsingJBossDeploymentStructureIT exte
 	}
 
 	private static PersistenceDescriptor persistenceXml() {
-		return Descriptors.create( PersistenceDescriptor.class )
-			.version( "2.0" )
-			.createPersistenceUnit()
+		return new TestingPersistenceDescriptor
+				.Builder( Member.class )
 				.name( "primary" )
-				.provider( "org.hibernate.ogm.jpa.HibernateOgmPersistence" )
-				.clazz( Member.class.getName() )
-				.getOrCreateProperties()
-					.createProperty().name( "jboss.as.jpa.providerModule" ).value( "application" ).up()
-					.createProperty().name( "hibernate.ogm.datastore.provider" ).value( "ehcache" ).up()
-					.createProperty().name( "hibernate.search.default.directory_provider" ).value( "ram" ).up()
-					.createProperty().name( "hibernate.transaction.jta.platform" ).value( "JBossAS" ).up()
-				.up().up();
+				.setProperty( "hibernate.ogm.datastore.provider", "ehcache" )
+				.persistenceXml();
 	}
 
 }

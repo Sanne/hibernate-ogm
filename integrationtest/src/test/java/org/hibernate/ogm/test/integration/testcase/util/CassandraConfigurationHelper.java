@@ -10,7 +10,7 @@ import org.jboss.shrinkwrap.descriptor.api.persistence20.PersistenceDescriptor;
 import org.jboss.shrinkwrap.descriptor.api.persistence20.PersistenceUnit;
 import org.jboss.shrinkwrap.descriptor.api.persistence20.Properties;
 
-public final class CassandraConfigurationHelper {
+final class CassandraConfigurationHelper {
 
 	public static final String CASSANDRA_HOSTNAME = System.getenv( "CASSANDRA_HOSTNAME" );
 	public static final String CASSANDRA_PORT = System.getenv( "CASSANDRA_PORT" );
@@ -19,13 +19,13 @@ public final class CassandraConfigurationHelper {
 		//not to be created
 	}
 
-	public static void setCassandraPort(Properties<PersistenceUnit<PersistenceDescriptor>> properties) {
+	static void setCassandraPort(Properties<PersistenceUnit<PersistenceDescriptor>> properties) {
 		if ( CASSANDRA_PORT != null ) {
 			properties.createProperty().name( "hibernate.ogm.datastore.port" ).value( CASSANDRA_PORT );
 		}
 	}
 
-	public static void setCassandraHostName(Properties<PersistenceUnit<PersistenceDescriptor>> properties) {
+	static void setCassandraHostName(Properties<PersistenceUnit<PersistenceDescriptor>> properties) {
 		if ( CASSANDRA_HOSTNAME != null ) {
 			properties.createProperty().name( "hibernate.ogm.datastore.host" ).value( CASSANDRA_HOSTNAME );
 		}

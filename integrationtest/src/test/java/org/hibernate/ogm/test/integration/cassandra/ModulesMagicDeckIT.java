@@ -6,23 +6,18 @@
  */
 package org.hibernate.ogm.test.integration.cassandra;
 
-import static org.hibernate.ogm.test.integration.testcase.util.CassandraConfigurationHelper.setCassandraHostName;
-import static org.hibernate.ogm.test.integration.testcase.util.CassandraConfigurationHelper.setCassandraPort;
-
 import org.hibernate.ogm.test.integration.testcase.MagiccardsDatabaseScenario;
 import org.hibernate.ogm.test.integration.testcase.controller.MagicCardsCollectionBean;
 import org.hibernate.ogm.test.integration.testcase.model.MagicCard;
 import org.hibernate.ogm.test.integration.testcase.util.ModulesHelper;
+import org.hibernate.ogm.test.integration.testcase.util.TestingPersistenceDescriptor;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 import org.jboss.shrinkwrap.descriptor.api.persistence20.PersistenceDescriptor;
-import org.jboss.shrinkwrap.descriptor.api.persistence20.PersistenceUnit;
-import org.jboss.shrinkwrap.descriptor.api.persistence20.Properties;
 import org.junit.runner.RunWith;
 
 /**
@@ -49,24 +44,14 @@ public class ModulesMagicDeckIT extends MagiccardsDatabaseScenario {
 	}
 
 	private static PersistenceDescriptor persistenceXml() {
-		PersistenceDescriptor descriptor = Descriptors.create( PersistenceDescriptor.class );
-		Properties<PersistenceUnit<PersistenceDescriptor>> properties = descriptor
-			.version( "2.0" )
-			.createPersistenceUnit()
+		return new TestingPersistenceDescriptor
+				.Builder( MagicCard.class )
 				.name( "primary" )
-				.provider( "org.hibernate.ogm.jpa.HibernateOgmPersistence" )
-				.clazz( MagicCard.class.getName() )
-				.getOrCreateProperties()
-					.createProperty().name( "jboss.as.jpa.providerModule" ).value( "application" ).up()
-					.createProperty().name( "hibernate.search.default.directory_provider" ).value( "ram" ).up()
-					.createProperty().name( "hibernate.ogm.datastore.database" ).value( "ogm_test_database" ).up()
-					.createProperty().name( "hibernate.ogm.datastore.provider" ).value( "cassandra_experimental" ).up()
-					.createProperty().name( "hibernate.transaction.jta.platform" ).value( "JBossAS" ).up();
-
-		setCassandraHostName( properties );
-		setCassandraPort( properties );
-
-		return descriptor;
+				.setProperty( "hibernate.ogm.datastore.provider", "cassandra_experimental" )
+				.setProperty( "hibernate.ogm.datastore.database", "ogm_test_database" )
+				.setCassandraHostName()
+				.setCassandraPort()
+				.persistenceXml();
 	}
 
 }

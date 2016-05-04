@@ -10,16 +10,14 @@ import org.hibernate.ogm.test.integration.testcase.MagiccardsDatabaseScenario;
 import org.hibernate.ogm.test.integration.testcase.controller.MagicCardsCollectionBean;
 import org.hibernate.ogm.test.integration.testcase.model.MagicCard;
 import org.hibernate.ogm.test.integration.testcase.util.ModulesHelper;
+import org.hibernate.ogm.test.integration.testcase.util.TestingPersistenceDescriptor;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 import org.jboss.shrinkwrap.descriptor.api.persistence20.PersistenceDescriptor;
-import org.jboss.shrinkwrap.descriptor.api.persistence20.PersistenceUnit;
-import org.jboss.shrinkwrap.descriptor.api.persistence20.Properties;
 import org.junit.runner.RunWith;
 
 /**
@@ -42,20 +40,12 @@ public class SearchIntegrationIT extends MagiccardsDatabaseScenario {
 	}
 
 	private static PersistenceDescriptor persistenceXml() {
-		PersistenceDescriptor descriptor = Descriptors.create( PersistenceDescriptor.class );
-		Properties<PersistenceUnit<PersistenceDescriptor>> properties = descriptor
-			.version( "2.0" )
-			.createPersistenceUnit()
+		return new TestingPersistenceDescriptor
+				.Builder( MagicCard.class )
 				.name( "primary" )
-				.provider( "org.hibernate.ogm.jpa.HibernateOgmPersistence" )
-				.clazz( MagicCard.class.getName() )
-				.getOrCreateProperties()
-					.createProperty().name( "jboss.as.jpa.providerModule" ).value( "application" ).up()
-					.createProperty().name( "hibernate.search.default.directory_provider" ).value( "ram" ).up()
-					.createProperty().name( "hibernate.ogm.datastore.provider" ).value( "infinispan" ).up()
-					.createProperty().name( "hibernate.ogm.infinispan.configuration_resourcename" ).value( "infinispan.xml" ).up()
-					.createProperty().name( "hibernate.transaction.jta.platform" ).value( "JBossAS" ).up();
-		return descriptor;
+				.setProperty( "hibernate.ogm.datastore.provider", "infinispan" )
+				.setProperty( "hibernate.ogm.infinispan.configuration_resourcename", "infinispan.xml" )
+				.persistenceXml();
 	}
 
 }

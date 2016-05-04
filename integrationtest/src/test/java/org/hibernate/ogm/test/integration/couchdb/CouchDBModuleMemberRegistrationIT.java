@@ -9,6 +9,7 @@ package org.hibernate.ogm.test.integration.couchdb;
 import org.hibernate.ogm.test.integration.testcase.ModuleMemberRegistrationScenario;
 import org.hibernate.ogm.test.integration.testcase.model.Member;
 import org.hibernate.ogm.test.integration.testcase.util.ModuleMemberRegistrationDeployment;
+import org.hibernate.ogm.test.integration.testcase.util.TestingPersistenceDescriptor;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -65,22 +66,15 @@ public class CouchDBModuleMemberRegistrationIT extends ModuleMemberRegistrationS
 	}
 
 	private static PersistenceDescriptor persistenceXml() {
-		return Descriptors.create( PersistenceDescriptor.class )
-					.version( "2.0" )
-					.createPersistenceUnit()
-						.name( "primary" )
-						.provider( "org.hibernate.ogm.jpa.HibernateOgmPersistence" )
-						.clazz( Member.class.getName() )
-						.getOrCreateProperties()
-							.createProperty().name( "jboss.as.jpa.providerModule" ).value( "application" ).up()
-							.createProperty().name( "hibernate.ogm.datastore.provider" ).value( "COUCHDB_EXPERIMENTAL" ).up()
-							.createProperty().name( "hibernate.ogm.datastore.host" ).value( couchDBHostName ).up()
-							.createProperty().name( "hibernate.ogm.datastore.port" ).value( couchDBPortNumber ).up()
-							.createProperty().name( "hibernate.ogm.datastore.database" ).value( "ogm_test_database" ).up()
-							.createProperty().name( "hibernate.ogm.datastore.create_database" ).value( "true" ).up()
-							.createProperty().name( "hibernate.search.default.directory_provider" ).value( "ram" ).up()
-							.createProperty().name( "hibernate.transaction.jta.platform" ).value( "JBossAS" ).up()
-					.up().up();
+		return new TestingPersistenceDescriptor
+				.Builder( Member.class )
+				.name( "primary" )
+				.setProperty( "hibernate.ogm.datastore.provider", "COUCHDB_EXPERIMENTAL" )
+				.setProperty( "hibernate.ogm.datastore.host", couchDBHostName )
+				.setProperty( "hibernate.ogm.datastore.port", couchDBPortNumber )
+				.setProperty( "hibernate.ogm.datastore.database", "ogm_test_database" )
+				.setProperty( "hibernate.ogm.datastore.create_database", "true" )
+				.persistenceXml();
 	}
 
 }
