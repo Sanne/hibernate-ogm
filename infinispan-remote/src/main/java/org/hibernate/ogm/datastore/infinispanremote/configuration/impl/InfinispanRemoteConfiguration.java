@@ -9,10 +9,13 @@ package org.hibernate.ogm.datastore.infinispanremote.configuration.impl;
 import java.net.URL;
 import java.util.Map;
 
+import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.ogm.datastore.infinispanremote.InfinispanRemoteProperties;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
 import org.hibernate.ogm.util.configurationreader.spi.ConfigurationPropertyReader;
 import org.hibernate.ogm.util.impl.Log;
 import org.hibernate.ogm.util.impl.LoggerFactory;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
 
 /**
  * Configuration for {@link InfinispanRemoteProperties}.
@@ -22,6 +25,8 @@ public class InfinispanRemoteConfiguration {
 	private static final Log log = LoggerFactory.make();
 
 	private URL configurationResource;
+
+	private SchemaCapture schemaCaptureService;
 
 	/**
 	 * The location of the configuration file.
@@ -33,17 +38,28 @@ public class InfinispanRemoteConfiguration {
 		return configurationResource;
 	}
 
+	public SchemaCapture getSchemaCaptureService() {
+		return schemaCaptureService;
+	}
+
 	/**
 	 * Initialize the internal values form the given {@link Map}.
 	 *
 	 * @param configurationMap
 	 *            The values to use as configuration
+	 * @param serviceRegistry 
 	 */
-	public void initConfiguration(Map<?, ?> configurationMap) {
-		ConfigurationPropertyReader propertyReader = new ConfigurationPropertyReader( configurationMap );
-
+	public void initConfiguration(Map<?, ?> configurationMap, ServiceRegistryImplementor serviceRegistry) {
+		ClassLoaderService classLoaderService = serviceRegistry.getService( ClassLoaderService.class );
+		ConfigurationPropertyReader propertyReader = new ConfigurationPropertyReader( configurationMap, classLoaderService );
+		
 		this.configurationResource = propertyReader
 				.property( InfinispanRemoteProperties.CONFIGURATION_RESOURCE_NAME, URL.class )
+				.getValue();
+
+		this.schemaCaptureService = propertyReader
+				.property( InfinispanRemoteProperties.SCHEMA_CAPTURE_SERVICE, SchemaCapture.class )
+				.instantiate()
 				.getValue();
 
 		log.tracef( "Initializing Infinispan Hot Rod client from configuration file at '%1$s'", configurationResource );

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.AssertionFailure;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
 import org.infinispan.client.hotrod.RemoteCache;
 
 public class SchemaDefinitions {
@@ -25,9 +26,12 @@ public class SchemaDefinitions {
 	// (both the schema definitions and the key/value pairs)
 	// This resource is defined in the Protostream jar
 
-	public void deploySchema(String generatedProtobufName, RemoteCache<String, String> protobufCache) {
+	public void deploySchema(String generatedProtobufName, RemoteCache<String, String> protobufCache, SchemaCapture schemaCapture) {
 		String generatedProtoschema = generateProtoschema();
 		protobufCache.put( generatedProtobufName, generatedProtoschema );
+		if ( schemaCapture != null ) {
+			schemaCapture.put( generatedProtobufName, generatedProtoschema );
+		}
 		// TODO log successful schema deployment
 	}
 

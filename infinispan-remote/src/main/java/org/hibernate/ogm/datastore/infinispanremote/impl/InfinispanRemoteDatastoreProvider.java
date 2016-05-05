@@ -14,6 +14,7 @@ import org.hibernate.ogm.datastore.infinispanremote.configuration.impl.Infinispa
 import org.hibernate.ogm.datastore.infinispanremote.impl.protobuf.SchemaDefinitions;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.Log;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
 import org.hibernate.ogm.datastore.spi.BaseDatastoreProvider;
 import org.hibernate.ogm.datastore.spi.SchemaDefiner;
 import org.hibernate.ogm.dialect.spi.GridDialect;
@@ -21,6 +22,8 @@ import org.hibernate.ogm.model.key.spi.AssociationKeyMetadata;
 import org.hibernate.ogm.model.key.spi.EntityKeyMetadata;
 import org.hibernate.ogm.model.key.spi.IdSourceKeyMetadata;
 import org.hibernate.service.spi.Configurable;
+import org.hibernate.service.spi.ServiceRegistryAwareService;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
 import org.hibernate.service.spi.Startable;
 import org.hibernate.service.spi.Stoppable;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -31,7 +34,7 @@ import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
  * @author Sanne Grinovero
  */
 public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
-				implements Startable, Stoppable, Configurable {
+				implements Startable, Stoppable, Configurable, ServiceRegistryAwareService {
 
 	private static final Log LOG = LoggerFactory.getLogger();
 
@@ -42,6 +45,12 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 	private RemoteCacheManager hotrodClient;
 
 	private CacheAccessor ca;
+
+	//Useful to allow people to dump the generated schema,
+	//we use it to capture the schema in tests too.
+	private SchemaCapture schemaCapture;
+
+	private ServiceRegistryImplementor serviceRegistry;
 
 	@Override
 	public Class<? extends GridDialect> getDefaultDialect() {
@@ -67,7 +76,13 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 	@Override
 	public void configure(Map configurationValues) {
 		this.config = new InfinispanRemoteConfiguration();
-		this.config.initConfiguration( configurationValues );
+		this.config.initConfiguration( configurationValues, serviceRegistry );
+		this.schemaCapture = config.getSchemaCaptureService();
+	}
+
+	@Override
+	public void injectServices(ServiceRegistryImplementor serviceRegistry) {
+		this.serviceRegistry = serviceRegistry;
 	}
 
 	@Override
@@ -88,7 +103,7 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 		RemoteCache<String,String> protobufCache = getProtobufCache();
 		//FIXME make this name configurable & give it a sensible default:
 		final String generatedProtobufName = "Hibernate_OGM_Generated_schema.proto";
-		sd.deploySchema( generatedProtobufName, protobufCache );
+		sd.deploySchema( generatedProtobufName, protobufCache, schemaCapture );
 	}
 
 	private RemoteCache<String, String> getProtobufCache() {

@@ -21,6 +21,13 @@ public final class InfinispanRemoteProperties implements KeyValueStoreProperties
 	 */
 	public static final String CONFIGURATION_RESOURCE_NAME = "hibernate.ogm.infinispan_remote.configuration_resource_name";
 
+	/**
+	 * You can inject an instance of {@link org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture} into
+	 * the configuration properties to capture the generated protobuf schema.
+	 * Useful for testing, or to dump the schema somewhere else.
+	 */
+	public static final String SCHEMA_CAPTURE_SERVICE = "hibernate.ogm.infinispan_remote.schema_capture_service";
+
 	private InfinispanRemoteProperties() {
 	}
 

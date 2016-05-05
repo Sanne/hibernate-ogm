@@ -1,0 +1,23 @@
+import "org/infinispan/protostream/message-wrapping.proto";
+
+package HibernateOGMGenerated;
+
+message SnowFlake {
+	required string id = 1;
+	required string description = 2;
+}
+
+message joinBackupSnowflakes {
+	required string Cloud_id = 1;
+	required string backupSnowFlakes_id = 2;
+}
+
+message joinProducedSnowflakes {
+	required string Cloud_id = 1;
+	required string producedSnowFlakes_id = 2;
+}
+
+message Cloud {
+	required string id = 1;
+	required string type = 3;
+}
