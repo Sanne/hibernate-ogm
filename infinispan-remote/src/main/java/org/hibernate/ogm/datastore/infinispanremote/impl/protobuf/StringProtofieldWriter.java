@@ -6,32 +6,19 @@
  */
 package org.hibernate.ogm.datastore.infinispanremote.impl.protobuf;
 
-import java.io.IOException;
-
 import com.google.protobuf.CodedOutputStream;
 
-public class StringProtofieldWriter implements ProtofieldWriter<String> {
+public final class StringProtofieldWriter extends BaseProtofieldWriter<String> implements ProtofieldWriter<String> {
 
-	private final int fieldLabel;
-	private final String name;
-
-	public StringProtofieldWriter(int labelCounter, String name) {
-		this.fieldLabel = labelCounter;
-		this.name = name;
+	public StringProtofieldWriter(final int tag, String name, boolean nullable) {
+		super( tag, name, nullable,
+			(CodedOutputStream outProtobuf, String value) -> outProtobuf.writeString( tag, value )
+			);
 	}
 
 	@Override
-	public void writeTo(CodedOutputStream outProtobuf, String value) throws IOException {
-		outProtobuf.writeString( fieldLabel, value );
-	}
-
-	@Override
-	public void exportProtobufFieldDefinition(StringBuilder sb) {
-		sb.append( "\n\trequired string " );
-		sb.append( name );
-		sb.append( " = " );
-		sb.append( fieldLabel );
-		sb.append( ";" );
+	protected String getProtobufTypeName() {
+		return "string";
 	}
 
 }

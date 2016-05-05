@@ -17,7 +17,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.ogm.backendtck.associations.collection.unidirectional.Cloud;
 import org.hibernate.ogm.backendtck.associations.collection.unidirectional.SnowFlake;
 import org.hibernate.ogm.backendtck.simpleentity.Helicopter;
+import org.hibernate.ogm.backendtck.simpleentity.Hero;
 import org.hibernate.ogm.backendtck.simpleentity.Hypothesis;
+import org.hibernate.ogm.backendtck.simpleentity.SuperHero;
 import org.hibernate.ogm.cfg.OgmProperties;
 import org.hibernate.ogm.datastore.infinispanremote.InfinispanRemoteProperties;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.MapSchemaCapture;
@@ -40,13 +42,18 @@ public class ProtoBufSchemaTest {
 	private static final String CHARSET_UTF8 = "UTF-8";
 
 	@Test
+	public void testingBasicCrudSchemaGeneration() throws IOException {
+		assertSchemaEquals( "Hypothesis_Helicopter.protobuf", Hypothesis.class, Helicopter.class );
+	}
+
+	@Test
 	public void testingSchemaGenerationWithJoins() throws IOException {
 		assertSchemaEquals( "Cloud_SnowFlake.protobuf", Cloud.class, SnowFlake.class );
 	}
 
 	@Test
-	public void testingBasicCrudSchemaGeneration() throws IOException {
-		assertSchemaEquals( "Hypothesis_Helicopter.protobuf", Hypothesis.class, Helicopter.class );
+	public void testingSchemaGenerationInheritance() throws IOException {
+		assertSchemaEquals( "Hero_SuperHero.protobuf", Hero.class, SuperHero.class );
 	}
 
 	private void assertSchemaEquals(String resourceName, Class<?>... types) throws IOException {

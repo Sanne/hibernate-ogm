@@ -4,11 +4,11 @@ package HibernateOGMGenerated;
 
 message Helicopter {
 	required string UUID = 1;
-	required string name = 2;
+	optional string name = 2;
 }
 
 message Hypothesis {
 	required string id = 1;
-	required string description = 2;
-	required int32 pos = 3;
+	optional string description = 2;
+	optional int32 pos = 3;
 }

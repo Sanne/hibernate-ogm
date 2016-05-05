@@ -4,7 +4,7 @@ package HibernateOGMGenerated;
 
 message SnowFlake {
 	required string id = 1;
-	required string description = 2;
+	optional string description = 2;
 }
 
 message joinBackupSnowflakes {
@@ -19,5 +19,6 @@ message joinProducedSnowflakes {
 
 message Cloud {
 	required string id = 1;
-	required string type = 3;
+	required double length = 2;
+	optional string type = 3;
 }

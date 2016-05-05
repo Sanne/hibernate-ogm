@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.mapping.Column;
+import org.hibernate.ogm.type.impl.DoubleType;
 import org.hibernate.ogm.type.impl.EnumType;
 import org.hibernate.ogm.type.impl.IntegerType;
 import org.hibernate.ogm.type.impl.LongType;
@@ -34,24 +35,28 @@ public class TableDefinition {
 	public void addPrimaryKeyColumn(Column pkColumn, GridType gridType, Type type, Type ormType) {
 		uniqueTagAssigningCounter++;
 		String name = pkColumn.getName();
-		addMapping( keyFields, name, uniqueTagAssigningCounter, gridType, ormType );
+		addMapping( keyFields, name, uniqueTagAssigningCounter, gridType, ormType, false );
 	}
 
 	public void addValueColumn(Column column, GridType gridType, Type ormType) {
 		uniqueTagAssigningCounter++;
-		String name = column.getName();
-		addMapping( valueFields, name, uniqueTagAssigningCounter, gridType, ormType );
+		final String name = column.getName();
+		final boolean nullable = column.isNullable();
+		addMapping( valueFields, name, uniqueTagAssigningCounter, gridType, ormType, nullable );
 	}
 
-	private void addMapping(List<ProtofieldWriter> fieldset, String name, int labelCounter2, GridType gridType, Type ormType) {
+	private void addMapping(List<ProtofieldWriter> fieldset, String name, int labelCounter, GridType gridType, Type ormType, boolean nullable) {
 		if ( gridType instanceof StringType ) {
-			fieldset.add( new StringProtofieldWriter( uniqueTagAssigningCounter, name ) );
+			fieldset.add( new StringProtofieldWriter( uniqueTagAssigningCounter, name, nullable ) );
 		}
 		else if ( gridType instanceof IntegerType ) {
-			fieldset.add( new IntegerProtofieldWriter( uniqueTagAssigningCounter, name ) );
+			fieldset.add( new IntegerProtofieldWriter( uniqueTagAssigningCounter, name, nullable ) );
 		}
 		else if ( gridType instanceof LongType ) {
-			fieldset.add( new LongProtofieldWriter( uniqueTagAssigningCounter, name ) );
+			fieldset.add( new LongProtofieldWriter( uniqueTagAssigningCounter, name, nullable ) );
+		}
+		else if ( gridType instanceof DoubleType ) {
+			fieldset.add( new DoubleProtofieldWriter( uniqueTagAssigningCounter, name, nullable ) );
 		}
 		else if ( gridType instanceof EnumType ) {
 			EnumType etype = (EnumType) gridType;
@@ -67,7 +72,7 @@ public class TableDefinition {
 			}
 		}
 		else {
-			//throw new AssertionFailure( "Type not implemented yet! " + gridType.getName() );
+			throw new AssertionFailure( "Type not implemented yet! " + gridType.getName() );
 		}
 	}
 

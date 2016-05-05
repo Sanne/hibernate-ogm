@@ -16,13 +16,13 @@ import com.google.protobuf.CodedOutputStream;
  */
 public class EnumProtofieldWriter implements ProtofieldWriter<Enum> {
 
-	private final int fieldLabel;
+	private final int tag;
 	private final String name;
 	private final Class<? extends Enum> type;
 	private final Enum[] enumConstants;
 
-	public EnumProtofieldWriter(int labelCounter, String name, Class<? extends Enum> type) {
-		this.fieldLabel = labelCounter;
+	public EnumProtofieldWriter(int tag, String name, Class<? extends Enum> type) {
+		this.tag = tag;
 		this.name = name;
 		this.enumConstants = type.getEnumConstants();
 		this.type = type;
@@ -30,7 +30,7 @@ public class EnumProtofieldWriter implements ProtofieldWriter<Enum> {
 
 	@Override
 	public void writeTo(CodedOutputStream outProtobuf, Enum value) throws IOException {
-		outProtobuf.writeEnum( fieldLabel, value.ordinal() );
+		outProtobuf.writeEnum( tag, value.ordinal() );
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class EnumProtofieldWriter implements ProtofieldWriter<Enum> {
 		sb.append( " " );
 		sb.append( name );
 		sb.append( " = " );
-		sb.append( fieldLabel );
+		sb.append( tag );
 		sb.append( ";" );
 	}
 

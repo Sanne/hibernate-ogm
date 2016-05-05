@@ -8,17 +8,18 @@ package org.hibernate.ogm.datastore.infinispanremote.impl.protobuf;
 
 import com.google.protobuf.CodedOutputStream;
 
-public final class IntegerProtofieldWriter extends BaseProtofieldWriter<Integer> implements ProtofieldWriter<Integer> {
 
-	public IntegerProtofieldWriter(int tag, String name, boolean nullable) {
+public class DoubleProtofieldWriter extends BaseProtofieldWriter<Double> implements ProtofieldWriter<Double> {
+
+	public DoubleProtofieldWriter(int tag, String name, boolean nullable) {
 		super(tag, name, nullable,
-				(CodedOutputStream outProtobuf, Integer value) -> outProtobuf.writeInt32( tag, value )
+				(CodedOutputStream outProtobuf, Double value) -> outProtobuf.writeDouble( tag, value )
 				);
 	}
 
 	@Override
 	protected String getProtobufTypeName() {
-		return "int32";
+		return "double";
 	}
 
 }

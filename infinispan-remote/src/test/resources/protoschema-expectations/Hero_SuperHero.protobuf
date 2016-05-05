@@ -1,0 +1,9 @@
+import "org/infinispan/protostream/message-wrapping.proto";
+
+package HibernateOGMGenerated;
+
+message Hero {
+	required string DTYPE = 1;
+	required string name = 2;
+	optional string specialPower = 3;
+}

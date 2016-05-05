@@ -47,12 +47,12 @@ public class InfinispanRemoteConfiguration {
 	 *
 	 * @param configurationMap
 	 *            The values to use as configuration
-	 * @param serviceRegistry 
+	 * @param serviceRegistry
 	 */
 	public void initConfiguration(Map<?, ?> configurationMap, ServiceRegistryImplementor serviceRegistry) {
 		ClassLoaderService classLoaderService = serviceRegistry.getService( ClassLoaderService.class );
 		ConfigurationPropertyReader propertyReader = new ConfigurationPropertyReader( configurationMap, classLoaderService );
-		
+
 		this.configurationResource = propertyReader
 				.property( InfinispanRemoteProperties.CONFIGURATION_RESOURCE_NAME, URL.class )
 				.getValue();
