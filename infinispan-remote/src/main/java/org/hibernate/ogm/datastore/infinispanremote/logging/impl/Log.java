@@ -6,10 +6,14 @@
  */
 package org.hibernate.ogm.datastore.infinispanremote.logging.impl;
 
+import static org.jboss.logging.Logger.Level.INFO;
+import static org.jboss.logging.Logger.Level.ERROR;
+
 import java.io.IOException;
 
 import org.hibernate.HibernateException;
 import org.jboss.logging.annotations.Cause;
+import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
 
@@ -25,5 +29,13 @@ public interface Log extends org.hibernate.ogm.util.impl.Log {
 
 	@Message(id = 1702, value = "Could not load the Hot Rod client configuration properties")
 	HibernateException failedLoadingHotRodConfigurationProperties(@Cause IOException e);
+
+	@Message(id = 1703, value = "Protobuf schema '%s' successfully deployed")
+	@LogMessage(level = INFO)
+	void successfullSchemaDeploy(String protobufName);
+
+	@Message(id = 1704, value = "Protobuf schema '%s' was deployed but errors reported from server [%s]")
+	@LogMessage(level = ERROR)
+	void errorAtSchemaDeploy(String generatedProtobufName, String schemaDeployErrors);
 
 }

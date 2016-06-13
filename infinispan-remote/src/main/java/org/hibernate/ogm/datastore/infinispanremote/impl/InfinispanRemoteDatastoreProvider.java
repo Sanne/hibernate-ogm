@@ -15,6 +15,7 @@ import org.hibernate.ogm.datastore.infinispanremote.impl.protobuf.SchemaDefiniti
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.Log;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
 import org.hibernate.ogm.datastore.spi.BaseDatastoreProvider;
 import org.hibernate.ogm.datastore.spi.SchemaDefiner;
 import org.hibernate.ogm.dialect.spi.GridDialect;
@@ -52,6 +53,8 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 
 	private ServiceRegistryImplementor serviceRegistry;
 
+	private SchemaOverride schemaOverrideService;
+
 	@Override
 	public Class<? extends GridDialect> getDefaultDialect() {
 		return InfinispanRemoteDialect.class;
@@ -78,6 +81,7 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 		this.config = new InfinispanRemoteConfiguration();
 		this.config.initConfiguration( configurationValues, serviceRegistry );
 		this.schemaCapture = config.getSchemaCaptureService();
+		this.schemaOverrideService = config.getSchemaOverrideService();
 	}
 
 	@Override
@@ -103,7 +107,7 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 		RemoteCache<String,String> protobufCache = getProtobufCache();
 		//FIXME make this name configurable & give it a sensible default:
 		final String generatedProtobufName = "Hibernate_OGM_Generated_schema.proto";
-		sd.deploySchema( generatedProtobufName, protobufCache, schemaCapture );
+		sd.deploySchema( generatedProtobufName, protobufCache, schemaCapture, schemaOverrideService );
 	}
 
 	private RemoteCache<String, String> getProtobufCache() {

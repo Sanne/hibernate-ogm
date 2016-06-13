@@ -11,6 +11,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.ogm.datastore.document.options.AssociationStorageType;
@@ -67,12 +68,6 @@ public class InfinispanRemoteTestHelper implements TestableGridDialect {
 		return associationCount;
 	}
 
-	@Override
-	public Map<String, Object> extractEntityTuple(SessionFactory sessionFactory, EntityKey key) {
-		//TODO
-		return null;
-	}
-
 	private static Cache<?, Map<String, Object>> getEntityCache(SessionFactory sessionFactory, EntityKeyMetadata entityKeyMetadata) {
 		//TODO
 		return null;
@@ -119,5 +114,23 @@ public class InfinispanRemoteTestHelper implements TestableGridDialect {
 	@Override
 	public Class<? extends DatastoreConfiguration<?>> getDatastoreConfigurationType() {
 		return InfinispanRemoteDataStoreConfiguration.class;
+	}
+
+	@Override
+	public Map<String, Object> extractEntityTuple(Session arg0, EntityKey arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public long getNumberOfAssociations(Session arg0) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getNumberOfEntities(Session arg0) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

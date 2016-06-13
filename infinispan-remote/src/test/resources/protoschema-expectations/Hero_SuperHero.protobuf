@@ -1,5 +1,3 @@
-import "org/infinispan/protostream/message-wrapping.proto";
-
 package HibernateOGMGenerated;
 
 message Hero {

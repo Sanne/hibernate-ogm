@@ -10,10 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.AssertionFailure;
+import org.hibernate.ogm.datastore.infinispanremote.logging.impl.Log;
+import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
 import org.infinispan.client.hotrod.RemoteCache;
 
 public class SchemaDefinitions {
+
+	private static final Log LOG = LoggerFactory.getLogger();
 
 	private final String packageName;
 	private final Map<String,TableDefinition> tableDefinitionsByName = new HashMap<>();
@@ -26,20 +31,25 @@ public class SchemaDefinitions {
 	// (both the schema definitions and the key/value pairs)
 	// This resource is defined in the Protostream jar
 
-	public void deploySchema(String generatedProtobufName, RemoteCache<String, String> protobufCache, SchemaCapture schemaCapture) {
-		String generatedProtoschema = generateProtoschema();
+	public void deploySchema(String generatedProtobufName, RemoteCache<String, String> protobufCache, SchemaCapture schemaCapture, SchemaOverride schemaOverrideService) {
+		final String generatedProtoschema = schemaOverrideService == null ? generateProtoschema() : schemaOverrideService.createProtobufSchema();
 		protobufCache.put( generatedProtobufName, generatedProtoschema );
 		if ( schemaCapture != null ) {
 			schemaCapture.put( generatedProtobufName, generatedProtoschema );
 		}
-		// TODO log successful schema deployment
+		final String schemaDeployErrors = protobufCache.get( ".errors" );
+		if ( schemaDeployErrors != null ) {
+			LOG.errorAtSchemaDeploy( generatedProtobufName, schemaDeployErrors );
+		}
+		else {
+			LOG.successfullSchemaDeploy( generatedProtobufName );
+		}
 	}
 
 	private String generateProtoschema() {
 		TypeDeclarationsCollector typesDefCollector = new TypeDeclarationsCollector();
 		StringBuilder sb = new StringBuilder( 400 );
-		sb.append( "import \"org/infinispan/protostream/message-wrapping.proto\";\n" );
-		sb.append( "\npackage " ).append( packageName ).append( ";\n" );
+		sb.append( "package " ).append( packageName ).append( ";\n" );
 		tableDefinitionsByName.forEach( ( k, v ) -> v.collectTypeDeclarations( typesDefCollector ) );
 		typesDefCollector.exportProtobufEntries( sb );
 		tableDefinitionsByName.forEach( ( k, v ) -> v.exportProtobufEntry( sb ) );

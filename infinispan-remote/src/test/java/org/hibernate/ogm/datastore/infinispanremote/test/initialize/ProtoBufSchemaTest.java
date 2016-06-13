@@ -23,8 +23,12 @@ import org.hibernate.ogm.backendtck.simpleentity.SuperHero;
 import org.hibernate.ogm.cfg.OgmProperties;
 import org.hibernate.ogm.datastore.infinispanremote.InfinispanRemoteProperties;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.MapSchemaCapture;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.ProvidedSchemaOverride;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
+import org.hibernate.ogm.datastore.infinispanremote.utils.RemoteHotRodServerRule;
 import org.hibernate.ogm.utils.TestHelper;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class ProtoBufSchemaTest {
@@ -41,6 +45,9 @@ public class ProtoBufSchemaTest {
 	 */
 	private static final String CHARSET_UTF8 = "UTF-8";
 
+	@Rule
+	public RemoteHotRodServerRule hotRodServer = new RemoteHotRodServerRule();
+
 	@Test
 	public void testingBasicCrudSchemaGeneration() throws IOException {
 		assertSchemaEquals( "Hypothesis_Helicopter.protobuf", Hypothesis.class, Helicopter.class );
@@ -54,6 +61,18 @@ public class ProtoBufSchemaTest {
 	@Test
 	public void testingSchemaGenerationInheritance() throws IOException {
 		assertSchemaEquals( "Hero_SuperHero.protobuf", Hero.class, SuperHero.class );
+	}
+
+	@Test
+	public void illegalSchemaGetsRefused() throws IOException {
+		SchemaOverride enforcedSchema = new ProvidedSchemaOverride( "% some gibberish %" );
+		Map<String, Object> settings = new HashMap<>();
+		settings.put( OgmProperties.DATASTORE_PROVIDER, "infinispan_remote" );
+		settings.put( InfinispanRemoteProperties.CONFIGURATION_RESOURCE_NAME, "hotrod-client-testingconfiguration.properties" );
+		settings.put( InfinispanRemoteProperties.SCHEMA_OVERRIDE_SERVICE, enforcedSchema );
+		try ( SessionFactory sessionFactory = TestHelper.getDefaultTestSessionFactory( settings, Hypothesis.class, Helicopter.class ) ) {
+			Assert.fail( "This should have refused to boot as the Protobuf schema is illegal" );
+		}
 	}
 
 	private void assertSchemaEquals(String resourceName, Class<?>... types) throws IOException {

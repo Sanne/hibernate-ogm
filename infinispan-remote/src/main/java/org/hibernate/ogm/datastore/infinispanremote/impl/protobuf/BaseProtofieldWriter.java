@@ -12,14 +12,14 @@ import com.google.protobuf.CodedOutputStream;
 
 public abstract class BaseProtofieldWriter<T> implements ProtofieldWriter<T> {
 
-	protected final int tag;
+	protected final int fieldNumber;
 	protected final String name;
 	protected final boolean nullable;
 	protected final ProtofieldEncoder<T> writingFunction;
 
 	public BaseProtofieldWriter(int fieldLabel, String fieldName, boolean nullable,
 			ProtofieldEncoder<T> writingFunction) {
-		this.tag = fieldLabel;
+		this.fieldNumber = fieldLabel;
 		this.name = fieldName;
 		this.nullable = nullable;
 		this.writingFunction = NullableProtofieldEncoder.makeNullableFieldEncoder( writingFunction, nullable );
@@ -42,7 +42,7 @@ public abstract class BaseProtofieldWriter<T> implements ProtofieldWriter<T> {
 			.append( " " )
 			.append( name )
 			.append( " = " )
-			.append( tag )
+			.append( fieldNumber )
 			.append( ";" );
 	}
 

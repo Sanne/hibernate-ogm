@@ -12,6 +12,7 @@ import java.util.Map;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.ogm.datastore.infinispanremote.InfinispanRemoteProperties;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
+import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
 import org.hibernate.ogm.util.configurationreader.spi.ConfigurationPropertyReader;
 import org.hibernate.ogm.util.impl.Log;
 import org.hibernate.ogm.util.impl.LoggerFactory;
@@ -28,6 +29,8 @@ public class InfinispanRemoteConfiguration {
 
 	private SchemaCapture schemaCaptureService;
 
+	private SchemaOverride schemaOverrideService;
+
 	/**
 	 * The location of the configuration file.
 	 *
@@ -40,6 +43,10 @@ public class InfinispanRemoteConfiguration {
 
 	public SchemaCapture getSchemaCaptureService() {
 		return schemaCaptureService;
+	}
+
+	public SchemaOverride getSchemaOverrideService() {
+		return schemaOverrideService;
 	}
 
 	/**
@@ -59,6 +66,12 @@ public class InfinispanRemoteConfiguration {
 
 		this.schemaCaptureService = propertyReader
 				.property( InfinispanRemoteProperties.SCHEMA_CAPTURE_SERVICE, SchemaCapture.class )
+				.instantiate()
+				.getValue();
+
+
+		this.schemaOverrideService = propertyReader
+				.property( InfinispanRemoteProperties.SCHEMA_OVERRIDE_SERVICE, SchemaOverride.class )
 				.instantiate()
 				.getValue();
 
