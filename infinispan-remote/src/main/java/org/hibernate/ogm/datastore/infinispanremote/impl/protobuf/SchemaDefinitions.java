@@ -15,6 +15,7 @@ import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
 import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
 
 public class SchemaDefinitions {
 
@@ -37,9 +38,9 @@ public class SchemaDefinitions {
 		if ( schemaCapture != null ) {
 			schemaCapture.put( generatedProtobufName, generatedProtoschema );
 		}
-		final String schemaDeployErrors = protobufCache.get( ".errors" );
+		final String schemaDeployErrors = protobufCache.get( ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX );
 		if ( schemaDeployErrors != null ) {
-			LOG.errorAtSchemaDeploy( generatedProtobufName, schemaDeployErrors );
+			throw LOG.errorAtSchemaDeploy( generatedProtobufName, schemaDeployErrors );
 		}
 		else {
 			LOG.successfullSchemaDeploy( generatedProtobufName );
@@ -54,7 +55,7 @@ public class SchemaDefinitions {
 		typesDefCollector.exportProtobufEntries( sb );
 		tableDefinitionsByName.forEach( ( k, v ) -> v.exportProtobufEntry( sb ) );
 		String fullSchema = sb.toString();
-		System.out.println( "Generated schema: \n===========\n" + fullSchema + "\n===========\n" );
+		LOG.generatedSchema( fullSchema );
 		return fullSchema;
 	}
 

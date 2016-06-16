@@ -16,6 +16,7 @@ import org.hibernate.ogm.datastore.infinispanremote.logging.impl.Log;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.client.hotrod.marshall.ProtoStreamMarshaller;
 
 public class HotRodClientBuilder {
 
@@ -41,6 +42,7 @@ public class HotRodClientBuilder {
 				new ConfigurationBuilder()
 					.classLoader( HotRodClientBuilder.class.getClassLoader() )
 					.withProperties( getHotRodConfigurationProperties() )
+					.marshaller( new ProtoStreamMarshaller() )
 					.build() );
 	}
 
