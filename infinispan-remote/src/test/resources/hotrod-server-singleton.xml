@@ -25,7 +25,5 @@
             <expiration interval="-1"/>
         </local-cache>
 
-        <local-cache name="___protobuf_metadata" />
-
     </cache-container>
 </infinispan>
