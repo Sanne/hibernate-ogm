@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.ogm.backendtck.associations.collection.unidirectional.Cloud;
 import org.hibernate.ogm.backendtck.associations.collection.unidirectional.SnowFlake;
@@ -70,9 +71,13 @@ public class ProtoBufSchemaTest {
 		settings.put( OgmProperties.DATASTORE_PROVIDER, "infinispan_remote" );
 		settings.put( InfinispanRemoteProperties.CONFIGURATION_RESOURCE_NAME, "hotrod-client-testingconfiguration.properties" );
 		settings.put( InfinispanRemoteProperties.SCHEMA_OVERRIDE_SERVICE, enforcedSchema );
-		try ( SessionFactory sessionFactory = TestHelper.getDefaultTestSessionFactory( settings, Hypothesis.class, Helicopter.class ) ) {
-			// FIXME: Infinispan not reporting the errors?
-			// Assert.fail( "This should have refused to boot as the Protobuf schema is illegal" );
+		try {
+			try ( SessionFactory sessionFactory = TestHelper.getDefaultTestSessionFactory( settings, Hypothesis.class, Helicopter.class ) ) {
+				Assert.fail( "This should have refused to boot as the Protobuf schema is illegal" );
+			}
+		}
+		catch (HibernateException he) {
+			Assert.assertTrue( "Unexpected exception message", he.getMessage().startsWith( "OGM001704" ) );
 		}
 	}
 
