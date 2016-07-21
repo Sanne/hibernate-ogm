@@ -26,7 +26,7 @@ import org.hibernate.ogm.model.key.spi.EntityKey;
 import org.hibernate.ogm.model.key.spi.EntityKeyMetadata;
 import org.hibernate.ogm.persister.impl.OgmCollectionPersister;
 import org.hibernate.ogm.persister.impl.OgmEntityPersister;
-import org.hibernate.ogm.utils.TestableGridDialect;
+import org.hibernate.ogm.utils.GridDialectTestHelper;
 import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.infinispan.Cache;
@@ -34,7 +34,7 @@ import org.infinispan.Cache;
 /**
  * @author Sanne Grinovero (C) 2015 Red Hat Inc.
  */
-public class InfinispanRemoteTestHelper implements TestableGridDialect {
+public class InfinispanRemoteTestHelper implements GridDialectTestHelper {
 
 	@Override
 	public long getNumberOfEntities(SessionFactory sessionFactory) {
