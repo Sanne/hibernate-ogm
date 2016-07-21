@@ -12,7 +12,7 @@ import com.google.protobuf.CodedOutputStream;
 public class DoubleProtofieldWriter extends BaseProtofieldWriter<Double> implements ProtofieldWriter<Double> {
 
 	public DoubleProtofieldWriter(int tag, String name, boolean nullable) {
-		super(tag, name, nullable,
+		super( tag, name, nullable,
 				(CodedOutputStream outProtobuf, Double value) -> outProtobuf.writeDouble( tag, value )
 				);
 	}

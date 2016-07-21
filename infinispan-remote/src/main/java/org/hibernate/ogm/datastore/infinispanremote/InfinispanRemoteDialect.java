@@ -93,7 +93,6 @@ public class InfinispanRemoteDialect<EK,AK,ISK> extends BaseGridDialect {
 	@Override
 	public void forEachTuple(ModelConsumer consumer, TupleContext tupleContext, EntityKeyMetadata entityKeyMetadata) {
 		// TODO Auto-generated method stub
-		
 	}
 
 }

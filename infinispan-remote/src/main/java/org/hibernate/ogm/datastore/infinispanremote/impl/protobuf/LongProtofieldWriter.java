@@ -8,7 +8,7 @@ package org.hibernate.ogm.datastore.infinispanremote.impl.protobuf;
 
 import com.google.protobuf.CodedOutputStream;
 
-final public class LongProtofieldWriter extends BaseProtofieldWriter<Long> implements ProtofieldWriter<Long> {
+public final class LongProtofieldWriter extends BaseProtofieldWriter<Long> implements ProtofieldWriter<Long> {
 
 	public LongProtofieldWriter(final int tag, final String name, final boolean nullable) {
 		super( tag, name, nullable,

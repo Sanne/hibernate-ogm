@@ -11,7 +11,7 @@ import com.google.protobuf.CodedOutputStream;
 public final class IntegerProtofieldWriter extends BaseProtofieldWriter<Integer> implements ProtofieldWriter<Integer> {
 
 	public IntegerProtofieldWriter(int fieldNumber, String name, boolean nullable) {
-		super(fieldNumber, name, nullable,
+		super( fieldNumber, name, nullable,
 				(CodedOutputStream outProtobuf, Integer value) -> outProtobuf.writeInt32( fieldNumber, value )
 				);
 	}

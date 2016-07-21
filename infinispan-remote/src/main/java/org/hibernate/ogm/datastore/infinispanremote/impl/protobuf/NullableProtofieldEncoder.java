@@ -19,7 +19,11 @@ public class NullableProtofieldEncoder {
 	 */
 	static <T> ProtofieldEncoder<T> makeNullableFieldEncoder(final ProtofieldEncoder<T> baseEncoder, final boolean isNullable) {
 		if ( isNullable ) {
-			return (CodedOutputStream outProtobuf, T value) -> { if ( value != null ) baseEncoder.encode( outProtobuf, value ); };
+			return (CodedOutputStream outProtobuf, T value) -> {
+				if ( value != null ) {
+					baseEncoder.encode( outProtobuf, value );
+				}
+			};
 		}
 		else {
 			return baseEncoder;
