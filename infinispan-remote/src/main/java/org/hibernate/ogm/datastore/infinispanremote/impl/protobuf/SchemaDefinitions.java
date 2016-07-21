@@ -15,6 +15,7 @@ import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
 import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.exceptions.HotRodClientException;
 import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
 
 public class SchemaDefinitions {
@@ -34,16 +35,15 @@ public class SchemaDefinitions {
 
 	public void deploySchema(String generatedProtobufName, RemoteCache<String, String> protobufCache, SchemaCapture schemaCapture, SchemaOverride schemaOverrideService) {
 		final String generatedProtoschema = schemaOverrideService == null ? generateProtoschema() : schemaOverrideService.createProtobufSchema();
-		protobufCache.put( generatedProtobufName, generatedProtoschema );
+		try {
+			protobufCache.put( generatedProtobufName, generatedProtoschema );
+			LOG.successfullSchemaDeploy( generatedProtobufName );
+		}
+		catch (HotRodClientException hrce) {
+			throw LOG.errorAtSchemaDeploy( generatedProtobufName, hrce );
+		}
 		if ( schemaCapture != null ) {
 			schemaCapture.put( generatedProtobufName, generatedProtoschema );
-		}
-		final String schemaDeployErrors = protobufCache.get( ProtobufMetadataManagerConstants.ERRORS_KEY_SUFFIX );
-		if ( schemaDeployErrors != null ) {
-			throw LOG.errorAtSchemaDeploy( generatedProtobufName, schemaDeployErrors );
-		}
-		else {
-			LOG.successfullSchemaDeploy( generatedProtobufName );
 		}
 	}
 
