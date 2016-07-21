@@ -501,6 +501,12 @@
                 <artifactId>infinispan-remote-query-client</artifactId>
                 <version>${infinispanVersion}</version>
             </dependency>
+            <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-remote-query-server</artifactId>
+                <scope>test</scope>
+                <version>${infinispanVersion}</version>
+            </dependency>
 
             <!-- MongoDB -->
             <dependency>
