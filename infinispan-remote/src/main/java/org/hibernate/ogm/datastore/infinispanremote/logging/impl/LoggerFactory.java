@@ -10,9 +10,6 @@ import org.jboss.logging.Logger;
 
 /**
  * Factory for obtaining {@link Logger} instances.
- *
- * @author Sanne Grinovero &lt;sanne@hibernate.org&gt; (C) 2012 Red Hat Inc.
- * @author Gunnar Morling
  */
 public class LoggerFactory {
 
