@@ -54,8 +54,7 @@ public class WrongConfigurationBootTest {
 	}
 
 	/**
-	 * @param configurationResourceName
-	 *            The Infinispan configuration resource to use to try booting OGM
+	 * @param configurationResourceName The Infinispan configuration resource to use to try booting OGM
 	 */
 	private void tryBoot(String configurationResourceName) {
 		Map<String, Object> settings = new HashMap<>();

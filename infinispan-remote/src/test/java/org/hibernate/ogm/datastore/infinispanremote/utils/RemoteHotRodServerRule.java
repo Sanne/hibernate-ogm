@@ -36,34 +36,37 @@ public final class RemoteHotRodServerRule extends org.junit.rules.ExternalResour
 
 	@Override
 	public void before() throws Throwable {
-		//Technically this CAS is not safe enough against a Rule and a Listener
-		//being triggered in parallel as the thread losing the race would not see
-		//an initialised server, but we assume tests are not running in parallel
-		if ( running.compareAndSet( false, true ) ) {
-			ConfigurationBuilderHolder cfgBuilder;
-			try ( InputStream inputStream = FileLookupFactory.newInstance()
-					.lookupFileStrict( CACHEMANAGER_CONFIGURATION_RESOURCE, RemoteHotRodServerRule.class.getClassLoader() ) ) {
-				cfgBuilder = new ParserRegistry().parse( inputStream );
+		//Synchronize on the static field to defend against concurrent launches,
+		//e.g. the usage as JUnit Rule concurrently with the usage as global test listener in Surefire.
+		synchronized ( running ) {
+			if ( running.compareAndSet( false, true ) ) {
+				ConfigurationBuilderHolder cfgBuilder;
+				try ( InputStream inputStream = FileLookupFactory.newInstance()
+						.lookupFileStrict( CACHEMANAGER_CONFIGURATION_RESOURCE, RemoteHotRodServerRule.class.getClassLoader() ) ) {
+					cfgBuilder = new ParserRegistry().parse( inputStream );
+				}
+				manager = new DefaultCacheManager( cfgBuilder, true );
+				HotRodServerConfigurationBuilder hotRodServerConfigurationBuilder = new HotRodServerConfigurationBuilder()
+						.port( HOTRODSERVER_PORT )
+						.host( "localhost" );
+				hotRodServer = HotRodClientTestingUtil.startHotRodServer( manager, HOTRODSERVER_PORT, hotRodServerConfigurationBuilder );
 			}
-			manager = new DefaultCacheManager( cfgBuilder, true );
-			HotRodServerConfigurationBuilder hotRodServerConfigurationBuilder = new HotRodServerConfigurationBuilder()
-					.port( HOTRODSERVER_PORT )
-					.host( "localhost" );
-			hotRodServer = HotRodClientTestingUtil.startHotRodServer( manager, HOTRODSERVER_PORT, hotRodServerConfigurationBuilder );
 		}
 	}
 
 	@Override
 	public void after() {
-		if ( hotRodServer != null ) {
-			running.set( false );
-			hotRodServer.stop();
+		synchronized ( running ) {
+			if ( hotRodServer != null ) {
+				running.set( false );
+				hotRodServer.stop();
+			}
+			TestingUtil.killCacheManagers( manager );
 		}
-		TestingUtil.killCacheManagers( manager );
 	}
 
 	public void resetHotRodServerState() {
-		// TODO Auto-generated method stub
+		// TODO Need to wipe server status?
 	}
 
 }

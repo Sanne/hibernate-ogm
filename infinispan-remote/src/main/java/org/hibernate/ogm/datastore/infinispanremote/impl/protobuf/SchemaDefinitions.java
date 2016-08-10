@@ -6,8 +6,10 @@
  */
 package org.hibernate.ogm.datastore.infinispanremote.impl.protobuf;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.Log;
@@ -16,7 +18,6 @@ import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.exceptions.HotRodClientException;
-import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
 
 public class SchemaDefinitions {
 
@@ -64,6 +65,10 @@ public class SchemaDefinitions {
 		if ( previous != null ) {
 			throw new AssertionFailure( "There should be no duplicate table definitions" );
 		}
+	}
+
+	public Set<String> getTableNames() {
+		return Collections.unmodifiableSet( tableDefinitionsByName.keySet() );
 	}
 
 }

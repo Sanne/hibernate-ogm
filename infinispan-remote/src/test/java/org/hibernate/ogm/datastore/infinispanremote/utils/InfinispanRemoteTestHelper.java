@@ -6,10 +6,14 @@
  */
 package org.hibernate.ogm.datastore.infinispanremote.utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -30,6 +34,8 @@ import org.hibernate.ogm.utils.GridDialectTestHelper;
 import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.commons.util.concurrent.NotifyingFuture;
 
 /**
  * @author Sanne Grinovero (C) 2015 Red Hat Inc.
@@ -68,9 +74,10 @@ public class InfinispanRemoteTestHelper implements GridDialectTestHelper {
 		return associationCount;
 	}
 
-	private static Cache<?, Map<String, Object>> getEntityCache(SessionFactory sessionFactory, EntityKeyMetadata entityKeyMetadata) {
-		//TODO
-		return null;
+	private static Cache<?, ?> getEntityCache(SessionFactory sessionFactory, EntityKeyMetadata entityKeyMetadata) {
+		final String tableName = entityKeyMetadata.getTable();
+		final InfinispanRemoteDatastoreProvider hotrodProvider = getProvider( sessionFactory );
+		return (Cache<?, ?>) hotrodProvider.getRemoteCacheManager().getCache( tableName );
 	}
 
 	public static InfinispanRemoteDatastoreProvider getProvider(SessionFactory sessionFactory) {
@@ -82,8 +89,9 @@ public class InfinispanRemoteTestHelper implements GridDialectTestHelper {
 	}
 
 	private static Cache<?, ?> getAssociationCache(SessionFactory sessionFactory, AssociationKeyMetadata associationKeyMetadata) {
-		//TODO
-		return null;
+		final String tableName = associationKeyMetadata.getTable();
+		final InfinispanRemoteDatastoreProvider hotrodProvider = getProvider( sessionFactory );
+		return (Cache<?, ?>) hotrodProvider.getRemoteCacheManager().getCache( tableName );
 	}
 
 	@Override
@@ -93,7 +101,26 @@ public class InfinispanRemoteTestHelper implements GridDialectTestHelper {
 
 	@Override
 	public void dropSchemaAndDatabase(SessionFactory sessionFactory) {
-		// TODO
+		final InfinispanRemoteDatastoreProvider datastoreProvider = getProvider( sessionFactory );
+		final RemoteCacheManager cacheManager = datastoreProvider.getRemoteCacheManager();
+		final Set<String> mappedCacheNames = datastoreProvider.getMappedCacheNames();
+		final List<NotifyingFuture<Void>> tasks = new ArrayList<>( mappedCacheNames.size() );
+		mappedCacheNames.forEach( cacheName -> {
+			tasks.add( cacheManager.getCache( cacheName ).clearAsync() );
+		});
+		//Now block and wait for all clear operation to be performed:
+		tasks.forEach( resetOperation -> {
+			try {
+				resetOperation.get();
+			}
+			catch (InterruptedException ie) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException( ie );
+			}
+			catch (ExecutionException ee) {
+				throw new RuntimeException( ee );
+			}
+		} );
 	}
 
 	@Override
@@ -129,8 +156,16 @@ public class InfinispanRemoteTestHelper implements GridDialectTestHelper {
 	}
 
 	@Override
-	public long getNumberOfEntities(Session arg0) {
-		// TODO Auto-generated method stub
-		return 0;
+	public long getNumberOfEntities(Session session) {
+		//FIXME this approach is effectively counting both entities and associations, mixed,
+		//as we only know about defined tables.
+		final InfinispanRemoteDatastoreProvider datastoreProvider = getProvider( session.getSessionFactory() );
+		final RemoteCacheManager cacheManager = datastoreProvider.getRemoteCacheManager();
+		final AtomicLong counter = new AtomicLong();
+		datastoreProvider.getMappedCacheNames().forEach( cacheName -> {
+			counter.addAndGet( cacheManager.getCache().size() );
+		} );
+		return counter.get();
 	}
+
 }

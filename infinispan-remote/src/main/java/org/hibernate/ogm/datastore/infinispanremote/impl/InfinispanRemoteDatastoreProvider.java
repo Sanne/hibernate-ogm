@@ -6,6 +6,8 @@
  */
 package org.hibernate.ogm.datastore.infinispanremote.impl;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,6 +56,8 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 	private ServiceRegistryImplementor serviceRegistry;
 
 	private SchemaOverride schemaOverrideService;
+
+	private Set<String> mappedCacheNames;
 
 	@Override
 	public Class<? extends GridDialect> getDefaultDialect() {
@@ -108,6 +112,12 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 		//FIXME make this name configurable & give it a sensible default:
 		final String generatedProtobufName = "Hibernate_OGM_Generated_schema.proto";
 		sd.deploySchema( generatedProtobufName, protobufCache, schemaCapture, schemaOverrideService );
+		setMappedCacheNames( sd.getTableNames() );
+	}
+
+	private void setMappedCacheNames(Set<String> tableNames) {
+		//TODO should we start these eagerly?
+		this.mappedCacheNames = Collections.unmodifiableSet( new HashSet( tableNames ) );
 	}
 
 	private RemoteCache<String, String> getProtobufCache() {
@@ -116,12 +126,16 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 
 	@Override
 	public boolean allowsTransactionEmulation() {
-		// Hot Rod doesn't support real transaction yet
+		// Hot Rod doesn't support "true" transaction yet
 		return true;
 	}
 
 	public String getProtobufPackageName() {
 		return "HibernateOGMGenerated";
+	}
+
+	public Set<String> getMappedCacheNames() {
+		return mappedCacheNames;
 	}
 
 }
