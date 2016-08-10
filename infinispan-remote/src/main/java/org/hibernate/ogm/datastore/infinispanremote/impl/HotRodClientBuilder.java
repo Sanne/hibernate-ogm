@@ -12,11 +12,11 @@ import java.net.URL;
 import java.util.Properties;
 
 import org.hibernate.ogm.datastore.infinispanremote.configuration.impl.InfinispanRemoteConfiguration;
+import org.hibernate.ogm.datastore.infinispanremote.impl.protostream.OgmProtoStreamMarshaller;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.Log;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
-import org.infinispan.client.hotrod.marshall.ProtoStreamMarshaller;
 
 public class HotRodClientBuilder {
 
@@ -42,7 +42,7 @@ public class HotRodClientBuilder {
 				new ConfigurationBuilder()
 					.classLoader( HotRodClientBuilder.class.getClassLoader() )
 					.withProperties( getHotRodConfigurationProperties() )
-					.marshaller( new ProtoStreamMarshaller() )
+					.marshaller( new OgmProtoStreamMarshaller() )
 					.build() );
 	}
 

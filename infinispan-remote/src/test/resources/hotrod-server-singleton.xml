@@ -25,5 +25,7 @@
             <expiration interval="-1"/>
         </local-cache>
 
+        <local-cache name="Hypothesis" />
+
     </cache-container>
 </infinispan>

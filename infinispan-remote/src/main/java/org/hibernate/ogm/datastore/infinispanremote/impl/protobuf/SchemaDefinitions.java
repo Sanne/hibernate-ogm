@@ -12,11 +12,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.AssertionFailure;
+import org.hibernate.ogm.datastore.infinispanremote.impl.protostream.ProtoDataMapper;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.Log;
 import org.hibernate.ogm.datastore.infinispanremote.logging.impl.LoggerFactory;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaCapture;
 import org.hibernate.ogm.datastore.infinispanremote.spi.schema.SchemaOverride;
 import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.exceptions.HotRodClientException;
 
 public class SchemaDefinitions {
@@ -69,6 +71,12 @@ public class SchemaDefinitions {
 
 	public Set<String> getTableNames() {
 		return Collections.unmodifiableSet( tableDefinitionsByName.keySet() );
+	}
+
+	public Map generateSchemaMappingAdapters(RemoteCacheManager hotrodClient) {
+		Map<String,ProtoDataMapper> adaptersCollector = new HashMap<>();
+		tableDefinitionsByName.forEach( ( k, v ) -> adaptersCollector.put( k, v.createProtoDataMapper( hotrodClient.getCache( k )) ) );
+		return adaptersCollector;
 	}
 
 }

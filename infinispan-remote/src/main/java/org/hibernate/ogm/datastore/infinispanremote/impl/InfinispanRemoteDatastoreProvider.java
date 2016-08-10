@@ -59,6 +59,9 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 
 	private Set<String> mappedCacheNames;
 
+	//For each cache we have a schema and a set of encoders/decoders to the generated protobuf schema
+	private Map<String,ProtoStreamMappingAdapter> perCacheSchemaMappers;
+
 	@Override
 	public Class<? extends GridDialect> getDefaultDialect() {
 		return InfinispanRemoteDialect.class;
@@ -113,10 +116,16 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 		final String generatedProtobufName = "Hibernate_OGM_Generated_schema.proto";
 		sd.deploySchema( generatedProtobufName, protobufCache, schemaCapture, schemaOverrideService );
 		setMappedCacheNames( sd.getTableNames() );
+		startCaches();
+		perCacheSchemaMappers = Collections.unmodifiableMap( sd.generateSchemaMappingAdapters( hotrodClient ) );
+	}
+
+	private void startCaches() {
+		//TODO wrap with some nice validation?
+		mappedCacheNames.forEach( cacheName -> hotrodClient.getCache( cacheName ) );
 	}
 
 	private void setMappedCacheNames(Set<String> tableNames) {
-		//TODO should we start these eagerly?
 		this.mappedCacheNames = Collections.unmodifiableSet( new HashSet( tableNames ) );
 	}
 
@@ -136,6 +145,10 @@ public class InfinispanRemoteDatastoreProvider extends BaseDatastoreProvider
 
 	public Set<String> getMappedCacheNames() {
 		return mappedCacheNames;
+	}
+
+	public ProtoStreamMappingAdapter getDataMapperForCache(String cacheName) {
+		return perCacheSchemaMappers.get( cacheName );
 	}
 
 }

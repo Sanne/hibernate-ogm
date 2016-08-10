@@ -8,9 +8,12 @@ package org.hibernate.ogm.datastore.infinispanremote.impl.protobuf;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.mapping.Column;
+import org.hibernate.ogm.datastore.infinispanremote.impl.protostream.MainOgmCoDec;
+import org.hibernate.ogm.datastore.infinispanremote.impl.protostream.ProtoDataMapper;
 import org.hibernate.ogm.type.impl.DoubleType;
 import org.hibernate.ogm.type.impl.EnumType;
 import org.hibernate.ogm.type.impl.IntegerType;
@@ -20,8 +23,9 @@ import org.hibernate.ogm.type.spi.GridType;
 import org.hibernate.type.CustomType;
 import org.hibernate.type.Type;
 import org.hibernate.usertype.UserType;
+import org.infinispan.client.hotrod.RemoteCache;
 
-public class TableDefinition {
+public final class TableDefinition {
 
 	private final String tableName;
 	private final List<ProtofieldWriter> keyFields = new ArrayList<ProtofieldWriter>();
@@ -90,6 +94,10 @@ public class TableDefinition {
 	void collectTypeDeclarations(TypeDeclarationsCollector typesDefCollector) {
 		keyFields.forEach( ( v ) -> v.collectTypeDefinitions( typesDefCollector ) );
 		valueFields.forEach( ( v ) -> v.collectTypeDefinitions( typesDefCollector ) );
+	}
+
+	public ProtoDataMapper createProtoDataMapper(RemoteCache remoteCache) {
+		return new ProtoDataMapper( "unused", new CompositeProtobufCoDec( tableName, keyFields, valueFields, remoteCache ) );
 	}
 
 }
