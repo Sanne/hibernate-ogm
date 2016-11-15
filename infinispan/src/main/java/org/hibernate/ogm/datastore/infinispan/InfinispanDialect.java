@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.hibernate.LockMode;
 import org.hibernate.dialect.lock.LockingStrategy;
@@ -19,6 +21,7 @@ import org.hibernate.dialect.lock.PessimisticForceIncrementLockingStrategy;
 import org.hibernate.ogm.datastore.infinispan.dialect.impl.InfinispanPessimisticWriteLockingStrategy;
 import org.hibernate.ogm.datastore.infinispan.dialect.impl.InfinispanTupleSnapshot;
 import org.hibernate.ogm.datastore.infinispan.impl.InfinispanEmbeddedDatastoreProvider;
+import org.hibernate.ogm.datastore.infinispan.persistencestrategy.id.impl.SequenceValue;
 import org.hibernate.ogm.datastore.infinispan.persistencestrategy.impl.KeyProvider;
 import org.hibernate.ogm.datastore.infinispan.persistencestrategy.impl.LocalCacheManager;
 import org.hibernate.ogm.datastore.infinispan.persistencestrategy.impl.LocalCacheManager.Bucket;
@@ -44,12 +47,13 @@ import org.hibernate.ogm.model.key.spi.RowKey;
 import org.hibernate.ogm.model.spi.Association;
 import org.hibernate.ogm.model.spi.Tuple;
 import org.hibernate.ogm.model.spi.Tuple.SnapshotType;
+import org.hibernate.ogm.util.impl.Log;
+import org.hibernate.ogm.util.impl.LoggerFactory;
 import org.hibernate.persister.entity.Lockable;
 import org.infinispan.AdvancedCache;
 import org.infinispan.Cache;
 import org.infinispan.atomic.AtomicMapLookup;
 import org.infinispan.atomic.FineGrainedAtomicMap;
-import org.infinispan.context.Flag;
 import org.infinispan.distexec.mapreduce.MapReduceTask;
 import org.infinispan.distexec.mapreduce.Reducer;
 
@@ -61,6 +65,8 @@ import org.infinispan.distexec.mapreduce.Reducer;
  * @author Emmanuel Bernard
  */
 public class InfinispanDialect<EK,AK,ISK> extends BaseGridDialect {
+
+	private static final Log log = LoggerFactory.make();
 
 	private final InfinispanEmbeddedDatastoreProvider provider;
 
@@ -186,34 +192,64 @@ public class InfinispanDialect<EK,AK,ISK> extends BaseGridDialect {
 		return false;
 	}
 
+//	static ConcurrentMap<Object, Object> identifierCache = new ConcurrentHashMap();
+
 	@Override
-	//TODO should we use GridTypes here?
 	public Number nextValue(NextValueRequest request) {
 		final AdvancedCache<ISK, Object> identifierCache = getCacheManager()
 				.getIdSourceCache( request.getKey().getMetadata() )
 				.getAdvancedCache();
 		ISK cacheKey = getKeyProvider().getIdSourceCacheKey( request.getKey() );
-		boolean done;
-		Number value;
+		
+		return incrementCounter( identifierCache, cacheKey, request.getInitialValue(), request.getIncrement() );
+	}
+
+	public static <K> Number incrementCounter(AdvancedCache<K,Object> identifierCache, K cacheKey, int initialValue, int increment) {
+		final boolean traceLogging = log.isTraceEnabled();
+		if ( traceLogging ) {
+			log.trace( "Invoking #nextValue on " + identifierCache + " with key " + cacheKey );
+		}
+
+		SequenceValue value;
 
 		do {
-			//skip locking proposed by Sanne
-			value = (Number) identifierCache.withFlags( Flag.SKIP_LOCKING ).get( cacheKey );
+			value = (SequenceValue) identifierCache.get( cacheKey );
 
+			// Possibly Initialise using PutIfAbsent if no initial value was stored yet
 			if ( value == null ) {
-				value = Long.valueOf( request.getInitialValue() );
-				final Number oldValue = (Number) identifierCache.putIfAbsent( cacheKey, value );
+				value = new SequenceValue( initialValue );
+				final SequenceValue oldValue = (SequenceValue) identifierCache.putIfAbsent( cacheKey, value );
 				if ( oldValue != null ) {
+					if ( traceLogging ) {
+						log.trace( "PutIfAbsent race! failed to write: " + value.longValue() + ". Moving on with newly read: " + oldValue.longValue() );
+					}
 					value = oldValue;
+				}
+				else {
+					// on a successful initialise we know the value so return:
+					if ( traceLogging ) {
+						log.trace( "PutIfAbsent success! Returning: " + value.longValue() );
+					}
+					return Long.valueOf( value.longValue() );
 				}
 			}
 
-			Number newValue = value.longValue() + request.getIncrement();
-			done = identifierCache.replace( cacheKey, value, newValue );
-		}
-		while ( !done );
+			// Generate the "Next value object"
+			SequenceValue newValue = new SequenceValue( value.longValue() + increment );
 
-		return value;
+			// Attempt to atomically replace the known value with the newly generated:
+			boolean replaced = identifierCache.replace( cacheKey, value, newValue );
+			if ( replaced ) {
+				if ( traceLogging ) {
+					log.trace( "Atomic replace success! Replaced: [" + value.longValue() + "]"
+							+ " Returning: [" + newValue.longValue() + "]"
+							+ " On Cache: [" + identifierCache + "]"
+							+ " With Key: [" + cacheKey + "]" );
+				}
+				return Long.valueOf( newValue.longValue() );
+			}
+		}
+		while ( true ); //TODO implement graceful back-off and eventually give up!
 	}
 
 	@Override

@@ -28,6 +28,8 @@ import org.hibernate.ogm.model.key.spi.AssociationKeyMetadata;
 import org.hibernate.ogm.model.key.spi.EntityKeyMetadata;
 import org.hibernate.ogm.model.key.spi.IdSourceKeyMetadata;
 import org.hibernate.ogm.model.key.spi.RowKey;
+import org.hibernate.ogm.util.impl.Log;
+import org.hibernate.ogm.util.impl.LoggerFactory;
 import org.infinispan.Cache;
 import org.infinispan.manager.EmbeddedCacheManager;
 
@@ -37,6 +39,8 @@ import org.infinispan.manager.EmbeddedCacheManager;
  * @author Gunnar Morling
  */
 public class PerTableCacheManager extends LocalCacheManager<PersistentEntityKey, PersistentAssociationKey, PersistentIdSourceKey> {
+
+	private static final Log log = LoggerFactory.make();
 
 	private static final String ASSOCIATIONS_CACHE_PREFIX = "associations_";
 
@@ -126,7 +130,9 @@ public class PerTableCacheManager extends LocalCacheManager<PersistentEntityKey,
 
 	@Override
 	public Cache<PersistentIdSourceKey, Object> getIdSourceCache(IdSourceKeyMetadata keyMetadata) {
-		return idSourceCaches.get( keyMetadata.getName() );
+		String name = keyMetadata.getName();
+		log.tracef( "Requesting idSource named %s", name );
+		return idSourceCaches.get( name );
 	}
 
 	@Override

@@ -47,7 +47,7 @@ public class ReplaceOperationStressTest {
 	private static final int MOVES = 200_000;
 	private static final int THREADS = 10;
 	private static final String SHARED_KEY = "thisIsTheKeyForConcurrentAccess";
-	private static final String CACHE_NAME = "IDENTIFIERS";
+	private static final String CACHE_NAME = "hibernate_sequences";
 
 	private static final String[] validMoves = generateValidMoves();
 

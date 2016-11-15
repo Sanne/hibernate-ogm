@@ -13,7 +13,7 @@ import org.infinispan.commons.marshall.AdvancedExternalizer;
  * Infinispan.
  * <p>
  * The range 1400 - 1499 is <a
- * href="http://infinispan.org/docs/6.0.x/user_guide/user_guide.html#_advanced_externalizers">reserved</a> for OGM.
+ * href="http://infinispan.org/docs/8.2.x/user_guide/user_guide.html#preassigned_externalizer_id_ranges">reserved</a> for OGM.
  *
  * @author Gunnar Morling
  */
@@ -32,4 +32,7 @@ public class ExternalizerIds {
 	public static final int PER_TABLE_ENTITY_KEY = 1410;
 	public static final int PER_TABLE_ASSOCIATION_KEY = 1411;
 	public static final int PER_TABLE_ID_GENERATOR_KEY = 1414;
+
+	// Storing of Sequences
+	public static final int SEQUENCEVALUE = 1420;
 }

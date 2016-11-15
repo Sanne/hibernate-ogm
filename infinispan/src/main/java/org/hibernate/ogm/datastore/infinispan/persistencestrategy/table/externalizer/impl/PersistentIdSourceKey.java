@@ -13,7 +13,7 @@ import org.hibernate.ogm.model.key.spi.IdSourceKey;
  *
  * @author Gunnar Morling
  */
-public class PersistentIdSourceKey {
+public final class PersistentIdSourceKey {
 
 	private final String name;
 	private final Object value;
@@ -52,7 +52,7 @@ public class PersistentIdSourceKey {
 		if ( obj == null ) {
 			return false;
 		}
-		if ( getClass() != obj.getClass() ) {
+		if ( PersistentIdSourceKey.class != obj.getClass() ) {
 			return false;
 		}
 		PersistentIdSourceKey other = (PersistentIdSourceKey) obj;
