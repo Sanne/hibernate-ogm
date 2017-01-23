@@ -11,8 +11,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -40,7 +41,6 @@ import org.hibernate.persister.entity.EntityPersister;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.Search;
 import org.infinispan.commons.util.CloseableIterator;
-import org.infinispan.commons.util.concurrent.NotifyingFuture;
 import org.infinispan.query.dsl.Query;
 
 /**
@@ -78,7 +78,7 @@ public class InfinispanRemoteTestHelper implements GridDialectTestHelper {
 	public void dropSchemaAndDatabase(SessionFactory sessionFactory) {
 		final InfinispanRemoteDatastoreProvider datastoreProvider = getProvider( sessionFactory );
 		final Set<String> mappedCacheNames = datastoreProvider.getMappedCacheNames();
-		final List<NotifyingFuture<Void>> tasks = new ArrayList<>( mappedCacheNames.size() );
+		final List<CompletableFuture<Void>> tasks = new ArrayList<>( mappedCacheNames.size() );
 		mappedCacheNames.forEach( cacheName -> {
 			RemoteCache<Object,Object> cache = datastoreProvider.getCache( cacheName );
 			if ( cache != null ) {
