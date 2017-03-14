@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ ~ Hibernate OGM, Domain model persistence for NoSQL datastores
+ ~
+ ~ License: GNU Lesser General Public License (LGPL), version 2.1 or later
+ ~ See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+  -->
+
+<!--
+    This is a legal configuration to bootstrap Infinispan, but with
+    several caches using a configuration which is not suited for
+    Hibernate OGM.
+    We use it to test that we do refuse to boot on such a configuration.
+-->
+<infinispan
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:infinispan:config:8.2 http://www.infinispan.org/schemas/infinispan-config-8.2.xsd"
+    xmlns="urn:infinispan:config:8.2">
+
+    <cache-container name="HibernateOGM-Testsuite" default-cache="DEFAULT" statistics="false">
+
+        <jmx duplicate-domains="true"/>
+
+        <local-cache name="DEFAULT">
+            <transaction mode="NON_XA" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+        <local-cache name="ENTITIES">
+            <transaction mode="NON_XA" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+        <local-cache name="ASSOCIATIONS">
+            <transaction mode="NON_XA" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+        <local-cache name="IDENTIFIERS">
+            <transaction mode="NONE" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+        <local-cache name="ASSOCIATIONS_WRONG">
+            <!-- Wrong!
+              We use AtomicMaps to store associations, which require transactions.
+              -->
+            <transaction mode="NONE" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+        <local-cache name="IDENTIFIERS_OPT">
+            <!-- Wrong!
+              A transactional cache using optimistic transactions will also need to enable write-skew checks
+              and also enable the simple versioning strategy.
+              -->
+            <transaction mode="NON_XA" locking="OPTIMISTIC" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+        <local-cache name="IDENTIFIERS_DEFAULT_TX">
+            <!-- Wrong!
+              A transactional cache using default Transaction Strategy will be treated as optimistic by Infinispan.
+              So this configuration also fails to enable write skew checks.
+              -->
+            <transaction mode="NON_XA" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+       <local-cache name="IDENTIFIERS_PESSIMISTIC">
+            <!-- Wrong!
+              A transactional cache using Pessimistic Locking Transactions will need to
+              enable REPEATABLE_READ isolation for CAS operations to be reliable.
+              -->
+            <transaction mode="NON_XA" locking="PESSIMISTIC" />
+            <expiration interval="-1"/>
+        </local-cache>
+
+    </cache-container>
+</infinispan>
